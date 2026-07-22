@@ -1,0 +1,9 @@
+{
+  "policies": {
+    "DisableTelemetry": true,
+    "DisplayBookmarksToolbar": false,
+    "Preferences": {
+      "toolkit.legacyUserProfileCustomizations.stylesheets": { "Value": true, "Status": "locked" }
+    }
+  }
+}
