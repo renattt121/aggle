@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["../src/background.ts"],
+  "sourcesContent": ["// Aggle Background Script - Basic Ad Block & Commands\nconsole.log(\"Aggle Extension Loaded!\");\n\nconst BLOCKED = [\n  \"*://*.doubleclick.net/*\",\n  \"*://*.googlesyndication.com/*\"\n];\n\nbrowser.webRequest.onBeforeRequest.addListener(\n  (details) => ({ cancel: true }),\n  { urls: BLOCKED },\n  [\"blocking\"]\n);\n\nbrowser.commands.onCommand.addListener((command) => {\n  if (command === \"toggle-ai-sidebar\") {\n    browser.sidebarAction.open().catch(() => {});\n  }\n});"],
+  "mappings": ";;;AACA,UAAQ,IAAI,yBAAyB;AAErC,MAAM,UAAU;AAAA,IACd;AAAA,IACA;AAAA,EACF;AAEA,UAAQ,WAAW,gBAAgB;AAAA,IACjC,CAAC,aAAa,EAAE,QAAQ,KAAK;AAAA,IAC7B,EAAE,MAAM,QAAQ;AAAA,IAChB,CAAC,UAAU;AAAA,EACb;AAEA,UAAQ,SAAS,UAAU,YAAY,CAAC,YAAY;AAClD,QAAI,YAAY,qBAAqB;AACnC,cAAQ,cAAc,KAAK,EAAE,MAAM,MAAM;AAAA,MAAC,CAAC;AAAA,IAC7C;AAAA,EACF,CAAC;",
+  "names": []
+}

@@ -4,6 +4,7 @@
     "module": "ESNext",
     "lib": ["ESNext", "DOM"],
     "moduleResolution": "node",
+    "types": ["firefox-webext-browser"],
     "strict": true,
     "esModuleInterop": true,
     "skipLibCheck": true,

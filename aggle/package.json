@@ -8,6 +8,7 @@
     "start": "web-ext run --source-dir extension --target firefox-desktop"
   },
   "devDependencies": {
+    "@types/firefox-webext-browser": "^143.0.0",
     "esbuild": "^0.21.0",
     "typescript": "^5.4.0",
     "web-ext": "^7.8.0"
