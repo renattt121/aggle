@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Aggle Stats</title>
+  <link rel="stylesheet" href="dashboard.css">
+</head>
+<body>
+  <div class="layout">
+    <nav class="side">
+      <div class="brand">
+        <img src="../../public/icons/aggle-icon.svg" alt="" class="logo">
+        <span>Aggle Stats</span>
+      </div>
+      <button class="nav-item active" data-tab="overview">Overview</button>
+      <button class="nav-item" data-tab="tabs">Tabs</button>
+      <button class="nav-item" data-tab="performance">Performance</button>
+    </nav>
+
+    <main class="content">
+      <!-- OVERVIEW -->
+      <section class="tab active" id="tab-overview">
+        <h1>Overview</h1>
+        <div class="grid-3">
+          <div class="card stat">
+            <div class="stat-label">Total Blocked</div>
+            <div class="stat-value" id="stat-total">0</div>
+          </div>
+          <div class="card stat">
+            <div class="stat-label">Blocked Today</div>
+            <div class="stat-value" id="stat-today">0</div>
+          </div>
+          <div class="card stat">
+            <div class="stat-label">Open Tabs</div>
+            <div class="stat-value" id="stat-tabs">0</div>
+          </div>
+        </div>
+        <div class="card">
+          <h2>Quick Info</h2>
+          <div class="info-grid">
+            <div class="info-row"><span class="label">Active Tabs</span><span class="value" id="stat-active">—</span></div>
+            <div class="info-row"><span class="label">Profile</span><span class="value" id="stat-profile">—</span></div>
+            <div class="info-row"><span class="label">Disk Cache</span><span class="value" id="stat-cache">—</span></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- TABS -->
+      <section class="tab" id="tab-tabs">
+        <h1>Tabs</h1>
+        <div class="card">
+          <div id="tab-list" class="tab-list"></div>
+        </div>
+      </section>
+
+      <!-- PERFORMANCE -->
+      <section class="tab" id="tab-performance">
+        <h1>Performance</h1>
+        <div class="card">
+          <h2>Resource Profile</h2>
+          <div class="row" id="profile-row">
+            <label class="seg"><input type="radio" name="profile" value="eco"><span>Eco</span></label>
+            <label class="seg"><input type="radio" name="profile" value="balanced" checked><span>Balanced</span></label>
+            <label class="seg"><input type="radio" name="profile" value="performance"><span>Performance</span></label>
+            <label class="seg"><input type="radio" name="profile" value="custom"><span>Custom</span></label>
+          </div>
+        </div>
+        <div class="card">
+          <h2>Custom Controls</h2>
+          <div class="field">
+            <label for="profile-proc">Content Processes</label>
+            <input type="range" id="profile-proc" min="1" max="16" value="8">
+            <output id="profile-proc-out">8</output>
+          </div>
+          <div class="field">
+            <label for="profile-cache">Disk Cache (MB)</label>
+            <input type="range" id="profile-cache" min="0" max="4096" step="256" value="512">
+            <output id="profile-cache-out">512 MB</output>
+          </div>
+          <label class="toggle"><input type="checkbox" id="profile-hw" checked><span>Hardware Video Decoding</span></label>
+          <label class="toggle"><input type="checkbox" id="profile-webgl" checked><span>WebRender (GPU Compositing)</span></label>
+        </div>
+      </section>
+    </main>
+  </div>
+  <script src="../../dist/dashboard.js"></script>
+</body>
+</html>

@@ -6,6 +6,8 @@ esbuild.build({
     "extension/src/background.ts",
     "extension/src/content.ts",
     "extension/src/sidebar/panel.ts",
+    "extension/src/sidebar/palette.ts",
+    "extension/src/options/options.ts",
     "extension/src/stats/dashboard.ts",
     "extension/src/newtab/newtab.ts",
     "extension/src/commands/shortcuts.ts",

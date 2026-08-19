@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Aggle Settings</title>
+  <link rel="stylesheet" href="options.css">
+</head>
+<body>
+  <div class="layout">
+    <nav class="side">
+      <div class="brand">
+        <img src="../../public/icons/aggle-icon.svg" alt="" class="brand-icon">
+        <span class="brand-name">Aggle</span>
+      </div>
+      <button class="nav-item active" data-tab="appearance">Appearance</button>
+      <button class="nav-item" data-tab="ai">AI Sidebar</button>
+      <button class="nav-item" data-tab="privacy">Privacy &amp; Blocking</button>
+      <button class="nav-item" data-tab="performance">Performance</button>
+      <button class="nav-item" data-tab="shortcuts">Shortcuts</button>
+      <div class="side-footer">
+        <button id="export-theme" class="ghost-btn">Export theme JSON</button>
+      </div>
+    </nav>
+
+    <main class="content">
+      <!-- APPEARANCE -->
+      <section class="tab active" id="tab-appearance">
+        <h1>Appearance</h1>
+
+        <div class="card">
+          <h2>Theme mode</h2>
+          <div class="row">
+            <label class="seg">
+              <input type="radio" name="mode" value="dark" checked>
+              <span>Dark</span>
+            </label>
+            <label class="seg">
+              <input type="radio" name="mode" value="oled">
+              <span>OLED Black</span>
+            </label>
+          </div>
+          <p class="hint">OLED mode drops chrome and new-tab backgrounds to pure #000000 for real power savings on OLED panels.</p>
+        </div>
+
+        <div class="card">
+          <h2>Accent</h2>
+          <div class="field">
+            <label for="accent-hue">Hue</label>
+            <input type="range" id="accent-hue" min="0" max="360" value="18">
+            <output id="accent-hue-out">18°</output>
+          </div>
+          <div class="field">
+            <label for="accent-sat">Saturation</label>
+            <input type="range" id="accent-sat" min="0" max="100" value="100">
+            <output id="accent-sat-out">100%</output>
+          </div>
+          <div class="accent-preview" id="accent-preview"></div>
+        </div>
+
+        <div class="card">
+          <h2>Glass</h2>
+          <div class="field">
+            <label for="blur">Blur intensity</label>
+            <input type="range" id="blur" min="0" max="40" value="24">
+            <output id="blur-out">24px</output>
+          </div>
+          <div class="field">
+            <label for="grain">Grain opacity</label>
+            <input type="range" id="grain" min="0" max="100" value="15">
+            <output id="grain-out">15%</output>
+          </div>
+        </div>
+
+        <div class="card">
+          <h2>Background preset</h2>
+          <div class="row" id="preset-row">
+            <label class="seg"><input type="radio" name="preset" value="ember" checked><span>Ember</span></label>
+            <label class="seg"><input type="radio" name="preset" value="frost"><span>Frost</span></label>
+            <label class="seg"><input type="radio" name="preset" value="void"><span>Void</span></label>
+          </div>
+        </div>
+
+        <div class="card">
+          <h2>New tab</h2>
+          <label class="toggle">
+            <input type="checkbox" id="custom-newtab" checked>
+            <span>Use Aggle custom new tab page</span>
+          </label>
+        </div>
+      </section>
+
+      <!-- AI -->
+      <section class="tab" id="tab-ai">
+        <h1>AI Sidebar</h1>
+
+        <div class="card">
+          <h2>Provider</h2>
+          <div class="field">
+            <select id="provider-select">
+              <option value="ollama">Ollama (local)</option>
+              <option value="groq">Groq</option>
+              <option value="openai">OpenAI</option>
+              <option value="xai">xAI</option>
+            </select>
+          </div>
+          <div class="field" id="field-model">
+            <label for="model-input">Model</label>
+            <input type="text" id="model-input" placeholder="llama3.1" list="model-suggestions">
+            <datalist id="model-suggestions"></datalist>
+          </div>
+        </div>
+
+        <div class="card" id="card-ollama">
+          <h2>Ollama endpoint</h2>
+          <div class="field">
+            <input type="text" id="ollama-url" placeholder="http://localhost:11434">
+          </div>
+          <p class="hint">Run models locally — nothing leaves your machine.</p>
+        </div>
+
+        <div class="card" id="card-groq">
+          <h2>Groq API key</h2>
+          <div class="field">
+            <input type="password" id="key-groq" placeholder="gsk_…">
+          </div>
+        </div>
+
+        <div class="card" id="card-openai">
+          <h2>OpenAI API key</h2>
+          <div class="field">
+            <input type="password" id="key-openai" placeholder="sk-…">
+          </div>
+        </div>
+
+        <div class="card" id="card-xai">
+          <h2>xAI API key</h2>
+          <div class="field">
+            <input type="password" id="key-xai" placeholder="xai-…">
+          </div>
+        </div>
+
+        <div class="card">
+          <h2>Page context</h2>
+          <label class="toggle">
+            <input type="checkbox" id="include-context" checked>
+            <span>Include current page content when chatting (summarize / translate / "explain this")</span>
+          </label>
+        </div>
+      </section>
+
+      <!-- PRIVACY / BLOCKER -->
+      <section class="tab" id="tab-privacy">
+        <h1>Privacy &amp; Blocking</h1>
+
+        <div class="card">
+          <h2>Ad &amp; tracker blocker</h2>
+          <label class="toggle">
+            <input type="checkbox" id="blocker-enabled" checked>
+            <span>Enable blocker</span>
+          </label>
+        </div>
+
+        <div class="card">
+          <h2>Filter lists</h2>
+          <div id="filter-lists"></div>
+          <div class="row add-list">
+            <input type="text" id="new-list-name" placeholder="List name">
+            <input type="text" id="new-list-url" placeholder="https://…/list.txt" class="grow">
+            <button id="add-list" class="primary-btn">Add</button>
+          </div>
+        </div>
+
+        <div class="card">
+          <h2>Whitelisted sites</h2>
+          <div id="whitelist"></div>
+          <div class="row add-list">
+            <input type="text" id="new-whitelist-host" placeholder="example.com" class="grow">
+            <button id="add-whitelist" class="primary-btn">Add</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- PERFORMANCE -->
+      <section class="tab" id="tab-performance">
+        <h1>Performance</h1>
+
+        <div class="card">
+          <h2>Resource profile</h2>
+          <div class="row" id="profile-row">
+            <label class="seg"><input type="radio" name="profile" value="eco"><span>Eco</span></label>
+            <label class="seg"><input type="radio" name="profile" value="balanced" checked><span>Balanced</span></label>
+            <label class="seg"><input type="radio" name="profile" value="performance"><span>Performance</span></label>
+            <label class="seg"><input type="radio" name="profile" value="custom"><span>Custom</span></label>
+          </div>
+          <p class="hint">Eco throttles background tabs and reduces processes. Performance gives more headroom for heavy sites.</p>
+        </div>
+
+        <div class="card" id="custom-profile-card">
+          <h2>Custom controls</h2>
+          <div class="field">
+            <label for="process-count">Content processes</label>
+            <input type="range" id="process-count" min="1" max="16" value="8">
+            <output id="process-count-out">8</output>
+          </div>
+          <div class="field">
+            <label for="disk-cache">Disk cache (MB)</label>
+            <input type="range" id="disk-cache" min="0" max="4096" step="256" value="512">
+            <output id="disk-cache-out">512</output>
+          </div>
+          <label class="toggle"><input type="checkbox" id="hw-video" checked><span>Hardware video decoding</span></label>
+          <label class="toggle"><input type="checkbox" id="webrender" checked><span>WebRender (GPU compositing)</span></label>
+          <div class="row">
+            <button id="copy-userjs" class="ghost-btn">Copy user.js snippet</button>
+          </div>
+          <p class="hint">Firefox locks process/cache prefs away from extensions. Aggle generates a user.js snippet you can drop into your profile to apply these — copy it below.</p>
+        </div>
+      </section>
+
+      <!-- SHORTCUTS -->
+      <section class="tab" id="tab-shortcuts">
+        <h1>Shortcuts</h1>
+        <div class="card">
+          <p class="hint">Firefox manages extension shortcuts in <code>about:addons → Extensions → Gear → Manage Extension Shortcuts</code>. Below are Aggle's current bindings — click a link to jump there.</p>
+          <div id="shortcut-list"></div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <div class="save-toast" id="toast">Saved</div>
+  <script src="../../dist/options.js"></script>
+</body>
+</html>

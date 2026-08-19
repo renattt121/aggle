@@ -1,1 +1,68 @@
-@-moz-document url("about:newtab"), url("about:home") { body { background: #0A0A0A !important; } }
+/* Aggle userContent — new tab and home page darkening */
+
+/* --------------------------------------------------------------------------
+   New tab / home — dark background
+   -------------------------------------------------------------------------- */
+@-moz-document url("about:newtab"), url("about:home") {
+  body, html {
+    background: #0A0A0A !important;
+    color: #EDEDEF !important;
+  }
+  /* Ensure the search bar and any default widgets sit on the dark bg */
+  .search-wrapper,
+  .search-container,
+  .logo-and-wordmark,
+  .tile {
+    /* Let the extension's custom new-tab page handle these; if it's not
+       active yet, keep defaults readable on dark */
+    color: inherit;
+  }
+}
+
+/* --------------------------------------------------------------------------
+   OLED mode — pure black for new tab (controlled via pref override)
+   -------------------------------------------------------------------------- */
+@-moz-document url("about:newtab"), url("about:home") {
+  html[aggle-olive-mode] body,
+  html[aggle-olive-mode] {
+    background: #000000 !important;
+  }
+}
+
+/* --------------------------------------------------------------------------
+   Context menu — glassy
+   -------------------------------------------------------------------------- */
+menupopup, #contentAreaContextMenu, #toolbar-context-menu, menulist {
+  background: #131316 !important;
+  border: 1px solid #26262B !important;
+  border-radius: 12px !important;
+  box-shadow: 0 12px 36px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.06) !important;
+  padding: 6px !important;
+  backdrop-filter: blur(24px) saturate(160%) !important;
+}
+
+menupopup menuitem, menupopup menu, menupopup menuseparator {
+  margin: 2px 0 !important;
+  border-radius: 7px !important;
+  padding: 4px 10px !important;
+}
+menupopup menuitem:hover, menupopup menu:hover {
+  background: linear-gradient(135deg, rgba(255,90,31,0.18), rgba(255,138,61,0.10)) !important;
+}
+menupopup menuseparator {
+  border-top: 1px solid #26262B !important;
+  margin: 4px 0 !important;
+}
+
+/* --------------------------------------------------------------------------
+   Tooltip — glass
+   -------------------------------------------------------------------------- */
+tooltip {
+  background: #131316 !important;
+  border: 1px solid #26262B !important;
+  border-radius: 10px !important;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.55) !important;
+  color: #EDEDEF !important;
+  padding: 6px 10px !important;
+  backdrop-filter: blur(18px) !important;
+}

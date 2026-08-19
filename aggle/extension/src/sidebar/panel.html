@@ -3,14 +3,55 @@
 <head>
   <meta charset="UTF-8">
   <title>Aggle AI</title>
-  <style>
-    body { margin: 0; padding: 20px; background: #0A0A0A; color: #e0e0e0; font-family: system-ui; }
-    h2 { color: #FF5A1F; }
-  </style>
+  <link rel="stylesheet" href="panel.css">
 </head>
 <body>
-  <h2>Aggle AI</h2>
-  <p>AI Sidebar will go here. You are testing the Aggle MVP!</p>
-  <script src="panel.ts"></script>
+  <header class="bar">
+    <div class="brand">
+      <img src="../../public/icons/aggle-icon.svg" alt="" class="logo">
+      <span>Aggle AI</span>
+    </div>
+    <div class="bar-actions">
+      <select id="provider-select" title="Provider"></select>
+      <select id="model-select" title="Model"></select>
+      <button id="new-chat" class="icon-btn" title="New chat">＋</button>
+      <a href="../options/options.html" target="_blank" class="icon-btn" title="Settings">⚙</a>
+    </div>
+  </header>
+
+  <div class="modes" id="modes">
+    <button class="mode active" data-mode="chat">Chat</button>
+    <button class="mode" data-mode="summarize">Summarize page</button>
+    <button class="mode" data-mode="translate">Translate</button>
+  </div>
+
+  <main id="messages" class="messages">
+    <div class="empty" id="empty-state">
+      <div class="empty-mark">▲</div>
+      <h2>Ask anything</h2>
+      <p>Aggle can see the page you're viewing. Try:</p>
+      <div class="chips">
+        <button class="chip" data-fill="Explain the key ideas of this page simply.">Explain this page</button>
+        <button class="chip" data-fill="Summarize this page in 3 bullets.">3-bullet summary</button>
+        <button class="chip" data-fill="What are the main arguments against this article's thesis?">Challenge it</button>
+        <button class="chip" data-fill="Extract all facts and figures into a table.">Extract facts</button>
+      </div>
+    </div>
+  </main>
+
+  <footer class="composer">
+    <div class="ctx-pill" id="ctx-pill" hidden>
+      <span class="ctx-dot"></span>
+      <span id="ctx-title">Reading page…</span>
+      <button id="ctx-remove" title="Ignore page context">✕</button>
+    </div>
+    <div class="input-row">
+      <textarea id="input" rows="1" placeholder="Ask about this page, or anything…"></textarea>
+      <button id="send" class="send-btn" title="Send">➤</button>
+    </div>
+    <div class="status" id="status"></div>
+  </footer>
+
+  <script src="../../dist/panel.js"></script>
 </body>
 </html>
