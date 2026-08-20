@@ -87,6 +87,16 @@
             <span>Use Aggle custom new tab page</span>
           </label>
         </div>
+
+        <div class="card">
+          <h2>Default search engine</h2>
+          <div class="row" id="search-engine-row">
+            <label class="seg"><input type="radio" name="search-engine" value="duckduckgo" checked><span>🦆 DuckDuckGo</span></label>
+            <label class="seg"><input type="radio" name="search-engine" value="google"><span>G Google</span></label>
+            <label class="seg"><input type="radio" name="search-engine" value="bing"><span>B Bing</span></label>
+          </div>
+          <p class="hint">Used in the Aggle address bar when you type a query instead of a URL.</p>
+        </div>
       </section>
 
       <!-- AI -->
@@ -212,7 +222,7 @@
           <div class="row">
             <button id="copy-userjs" class="ghost-btn">Copy user.js snippet</button>
           </div>
-          <p class="hint">Firefox locks process/cache prefs away from extensions. Aggle generates a user.js snippet you can drop into your profile to apply these — copy it below.</p>
+          <p class="hint">LibreWolf locks process/cache prefs away from extensions. Aggle generates a user.js snippet you can drop into your profile to apply these — copy it below.</p>
         </div>
       </section>
 
@@ -220,7 +230,7 @@
       <section class="tab" id="tab-shortcuts">
         <h1>Shortcuts</h1>
         <div class="card">
-          <p class="hint">Firefox manages extension shortcuts in <code>about:addons → Extensions → Gear → Manage Extension Shortcuts</code>. Below are Aggle's current bindings — click a link to jump there.</p>
+          <p class="hint">LibreWolf manages extension shortcuts in <code>about:addons → Extensions → Gear → Manage Extension Shortcuts</code>. Below are Aggle's current bindings — click a link to jump there.</p>
           <div id="shortcut-list"></div>
         </div>
       </section>
@@ -228,6 +238,6 @@
   </div>
 
   <div class="save-toast" id="toast">Saved</div>
-  <script src="../../dist/options.js"></script>
+  <script src="../../dist/options/options.js"></script>
 </body>
 </html>

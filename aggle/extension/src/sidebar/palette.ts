@@ -84,14 +84,14 @@ function openPalette(): void {
   focusedIdx = 0;
   const input = $("#palette-input") as HTMLInputElement;
   input.value = "";
-  document.body.classList.add("aggle-palette-open");
+  document.body.classList.add("palette-open");
   render();
   setTimeout(() => $("#palette-input").focus(), 10);
 }
 
 function closePalette(): void {
   isOpen = false;
-  document.body.classList.remove("aggle-palette-open");
+  document.body.classList.remove("palette-open");
 }
 
 function bind(): void {

@@ -65,6 +65,7 @@ export const DEFAULT_SETTINGS: AggleSettings = {
   general: {
     customNewTab: true,
     commandPaletteEnabled: true,
+    searchEngine: "duckduckgo" as const,
   },
 };
 

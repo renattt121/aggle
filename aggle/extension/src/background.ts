@@ -1,4 +1,3 @@
-import { getSettings } from "./utils/storage";
 import { blockerEngine } from "./blocker/engine";
 import { refreshBadge } from "./blocker/ui";
 import type { AggleMessage } from "./utils/messages";

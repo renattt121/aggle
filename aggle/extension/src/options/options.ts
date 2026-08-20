@@ -106,6 +106,13 @@ function bindAppearance(): void {
     scheduleSave();
   });
 
+  document.querySelectorAll<HTMLInputElement>(`input[name="search-engine"]`).forEach((r) =>
+    r.addEventListener("change", () => {
+      settings.general.searchEngine = r.value as "duckduckgo" | "google" | "bing";
+      scheduleSave();
+    })
+  );
+
   $("#export-theme").addEventListener("click", () => {
     const blob = new Blob([JSON.stringify(settings.theme, null, 2)], { type: "application/json" });
     const url = URL.createObjectURL(blob);
@@ -379,6 +386,10 @@ function fillFields(): void {
     r.checked = r.value === theme.backgroundPreset;
   });
   $<HTMLInputElement>("#custom-newtab").checked = general.customNewTab;
+
+  document.querySelectorAll<HTMLInputElement>(`input[name="search-engine"]`).forEach((r) => {
+    r.checked = r.value === general.searchEngine;
+  });
 
   $<HTMLSelectElement>("#provider-select").value = sidebar.providerId;
   $<HTMLInputElement>("#model-input").value = sidebar.model;

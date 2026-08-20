@@ -1,0 +1,19 @@
+{
+  "compilerOptions": {
+    "target": "ESNext",
+    "module": "ESNext",
+    "lib": ["ESNext", "DOM"],
+    "moduleResolution": "node",
+    "types": ["firefox-webext-browser", "node", "vitest/globals"],
+    "strict": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "noEmit": true
+  },
+  "include": [
+    "extension/src/**/*.test.ts",
+    "test/**/*"
+  ],
+  "exclude": ["node_modules", "extension/dist"]
+}

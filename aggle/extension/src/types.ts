@@ -124,5 +124,6 @@ export interface AggleSettings {
   general: {
     customNewTab: boolean;
     commandPaletteEnabled: boolean;
+    searchEngine: "duckduckgo" | "google" | "bing";
   };
 }

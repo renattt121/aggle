@@ -8,7 +8,10 @@ let idCounter = 0;
 
 function toRegex(pattern: string, isException: boolean): RegExp | null {
   // Strip leading/trailing modifiers that don't affect the match.
-  const clean = pattern.replace(/([^a-zA-Z0-9])$/g, "$1").replace(/\$\w(?:=[^$]+)?$/g, "").trim();
+  // Modifiers like $third-party, $important, $match-case can appear after ^ or at end.
+  const clean = pattern
+    .replace(/\$[a-zA-Z][a-zA-Z0-9_-]*(?:=[^$]*)?/g, "")
+    .trim();
 
   // Double-bar prefix (||) — hostname-anchored.
   if (clean.startsWith("||")) {
@@ -27,14 +30,15 @@ function toRegex(pattern: string, isException: boolean): RegExp | null {
 
   // Wildcard — convert to a regex.
   if (clean.includes("*")) {
-    const esc = clean.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-    const re = new RegExp("^" + esc.replace(/\*/g, ".*") + "$", "i");
+    // Escape everything except * first, then replace escaped asterisks with .*
+    const esc = clean.replace(/[*]/g, "\x00").replace(/[.+?^${}()|[\]\\]/g, "\\$&").replace(/\x00/g, ".*");
+    const re = new RegExp("^" + esc + "$", "i");
     return isException ? null : re;
   }
 
-  // Exact match.
+  // Exact match — anchor to avoid substring matches, but allow URL prefixes.
   const exact = clean.replace(/[^a-zA-Z0-9._-]/g, "\\$&");
-  if (!isException) return new RegExp(exact, "i");
+  if (!isException) return new RegExp("(?:^|[^a-zA-Z0-9._-])" + exact + "(?:$|[^a-zA-Z0-9._-])", "i");
   return null;
 }
 
@@ -56,7 +60,7 @@ export function parseRule(line: string): Filter | null {
     pattern,
     regex: regex!,
     domain,
-    isException: false,
+    isException,
   };
 }
 

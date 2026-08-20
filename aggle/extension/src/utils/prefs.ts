@@ -1,6 +1,6 @@
 import type { ResourceProfileSettings } from "../types";
 
-// Firefox exposes only a slice of prefs to WebExtensions via browser.privacy
+// LibreWolf exposes only a slice of prefs to WebExtensions via browser.privacy
 // (network/tracking protection, webRTC IP handling, etc.). Process count and
 // cache capacity can't be set from an extension — for the Path A build we
 // record the user's choice and generate a user.js snippet the policies layer
