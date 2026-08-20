@@ -1,7 +1,7 @@
 {
   "name": "aggle-browser",
   "version": "0.2.0-beta.5",
-  "description": "Aggle - Premium privacy browser layer for LibreWolf",
+  "description": "Aggle - Premium privacy browser layer for Aggle",
   "scripts": {
     "dev": "node esbuild.ext.config.mjs",
     "build": "node esbuild.ext.config.mjs prod",

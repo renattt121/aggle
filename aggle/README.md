@@ -1,6 +1,6 @@
 # Aggle
 
-Premium privacy browser for **macOS** — LibreWolf, re-skinned with glassmorphism, AI sidebar, ad blocking, and a command palette. One-click install. No extension management.
+Premium privacy browser for **macOS** — Aggle, re-skinned with glassmorphism, AI sidebar, ad blocking, and a command palette. One-click install. No extension management.
 
 > **Current status:** v1.0.0 — standalone macOS app with native AI sidebar, full glass skin, and all features built in.
 
@@ -23,14 +23,14 @@ Premium privacy browser for **macOS** — LibreWolf, re-skinned with glassmorphi
 ### System Requirements
 
 - macOS 13.0 (Ventura) or later
-- LibreWolf must be installed at `/Applications/LibreWolf.app`
+- Aggle must be installed at `/Applications/Aggle.app`
 
 ### Install
 
 1. Download the `.dmg` from the [latest release](https://github.com/lukaorieto-lab/aggle/releases)
 2. Drag **Aggle.app** to your Applications folder
 3. Open Aggle — the first launch sets up your profile automatically
-4. LibreWolf opens with Aggle's glass skin and AI sidebar ready
+4. Aggle opens with Aggle's glass skin and AI sidebar ready
 
 ### Build from Source
 
@@ -72,9 +72,9 @@ Aggle.app/
 **Launcher flow:**
 1. Creates Aggle profile at `~/Library/Application Support/Aggle/`
 2. Copies chrome files into `<profile>/chrome/`
-3. Writes `user.js` with LibreWolf + Aggle preferences
+3. Writes `user.js` with Aggle + Aggle preferences
 4. Extracts and installs the Aggle extension
-5. Launches LibreWolf with the Aggle profile
+5. Launches Aggle with the Aggle profile
 
 See [docs/architecture.md](docs/architecture.md) for the full system breakdown.
 
@@ -89,20 +89,20 @@ npm run dev          # watch mode — rebuilds on save
 npm run build        # production build
 ```
 
-1. Open LibreWolf
+1. Open Aggle
 2. Go to `about:debugging#/runtime/this-firefox`
 3. Click **"Load Temporary Add-on…"**
 4. Select `aggle/extension/manifest.json`
-5. Copy `aggle/chrome/userChrome.css` and `aggle/chrome/userContent.css` into your LibreWolf profile's `chrome/` folder
+5. Copy `aggle/chrome/userChrome.css` and `aggle/chrome/userContent.css` into your Aggle profile's `chrome/` folder
 
 ## Troubleshooting
 
-### LibreWolf not found
+### Aggle not found
 
-The launcher expects LibreWolf at `/Applications/LibreWolf.app`. If installed elsewhere, symlink it:
+The launcher expects Aggle at `/Applications/Aggle.app`. If installed elsewhere, symlink it:
 
 ```bash
-ln -s /path/to/LibreWolf.app /Applications/LibreWolf.app
+ln -s /path/to/Aggle.app /Applications/Aggle.app
 ```
 
 ### Glass skin not showing
@@ -110,7 +110,7 @@ ln -s /path/to/LibreWolf.app /Applications/LibreWolf.app
 1. Open `about:config`
 2. Search for `toolkit.legacyUserProfileCustomizations.stylesheets`
 3. Ensure it's set to `true`
-4. Restart LibreWolf
+4. Restart Aggle
 
 ### AI sidebar not loading
 

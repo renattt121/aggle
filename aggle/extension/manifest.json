@@ -2,7 +2,7 @@
   "manifest_version": 2,
   "name": "Aggle",
   "version": "1.0.0",
-  "description": "Aggle — premium privacy browser layer for LibreWolf",
+  "description": "Aggle — premium privacy browser layer for Aggle",
   "applications": {
     "gecko": {
       "id": "aggle@aggle.dev",

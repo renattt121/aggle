@@ -2,7 +2,7 @@
 
 ## Overview
 
-Aggle is a standalone macOS application that wraps LibreWolf with a custom glassmorphism skin, native AI sidebar, ad blocking, and a command palette. The app is a thin launcher that manages a dedicated Firefox profile and launches LibreWolf with that profile.
+Aggle is a standalone macOS application that wraps Aggle with a custom glassmorphism skin, native AI sidebar, ad blocking, and a command palette. The app is a thin launcher that manages a dedicated Firefox profile and launches Aggle with that profile.
 
 ```
 ┌─────────────────────────────────────────────────────┐
@@ -15,12 +15,12 @@ Aggle is a standalone macOS application that wraps LibreWolf with a custom glass
 │  │  2. Copy chrome CSS → profile/chrome/       │    │
 │  │  3. Write user.js prefs                     │    │
 │  │  4. Extract XPI → profile/extensions/       │    │
-│  │  5. Launch LibreWolf --profile PROFILE      │    │
+│  │  5. Launch Aggle --profile PROFILE      │    │
 │  └─────────────────────────────────────────────┘    │
 │                          │                          │
 │                          ▼                          │
 │  ┌─────────────────────────────────────────────┐    │
-│  │       LibreWolf (Firefox-based)              │    │
+│  │       Aggle (Firefox-based)              │    │
 │  │                                             │    │
 │  │  ┌─ userChrome.css ────────────────────┐    │    │
 │  │  │  Glass tab strip (36px)              │    │    │
@@ -42,7 +42,7 @@ Aggle is a standalone macOS application that wraps LibreWolf with a custom glass
 
 ## Launcher (`launcher/aggle-launcher`)
 
-The launcher is a Python 3 script that orchestrates the profile setup and LibreWolf launch.
+The launcher is a Python 3 script that orchestrates the profile setup and Aggle launch.
 
 ### Profile Location
 
@@ -53,7 +53,7 @@ The launcher is a Python 3 script that orchestrates the profile setup and LibreW
 │   └── userContent.css     # Web content skin
 ├── extensions/
 │   └── aggle@aggle.dev/    # Extracted extension
-├── prefs.js                # LibreWolf preferences (auto-generated)
+├── prefs.js                # Aggle preferences (auto-generated)
 ├── user.js                 # Aggle overrides (auto-generated)
 └── chrome注册/               # (if needed for future)
 ```
@@ -75,13 +75,13 @@ PROFILE = Path.home() / "Library/Application Support/Aggle/Profiles/default"
 6. Extract aggle-extension.xpi → PROFILE/extensions/aggle@aggle.dev/
    - Read zip manifest.json for extension ID
    - Extract all files preserving directory structure
-7. subprocess.run(["open", "-a", "/Applications/LibreWolf.app",
+7. subprocess.run(["open", "-a", "/Applications/Aggle.app",
                    "--args", "--profile", str(PROFILE)])
 ```
 
 ### user.js Generation
 
-The launcher writes a `user.js` that LibreWolf reads on startup. This file contains:
+The launcher writes a `user.js` that Aggle reads on startup. This file contains:
 
 ```javascript
 // Browser chrome
@@ -90,7 +90,7 @@ userPref("toolkit.proton.tabs.enabled", true);
 userPref("browser.tabs.drawInTitlebar", false);  // native titlebar for macOS
 userPref("browser.newtabpage.enabled", true);
 
-// Privacy (LibreWolf defaults)
+// Privacy (Aggle defaults)
 userPref("privacy.resistFingerprinting", 1);
 userPref("privacy.trackingprotection.enabled", true);
 userPref("network.dns.disableIPv6", true);
@@ -277,7 +277,7 @@ type Message =
 │   ├── dist/panel.js          ← from XPI
 │   └── ...
 ├── user.js                    ← generated
-└── prefs.js                   ← LibreWolf default (created by Firefox)
+└── prefs.js                   ← Aggle default (created by Firefox)
 ```
 
 ### Updates
