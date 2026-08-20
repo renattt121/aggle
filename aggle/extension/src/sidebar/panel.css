@@ -262,3 +262,66 @@ textarea:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3
 .send-btn:disabled { opacity: 0.4; cursor: default; }
 
 .status { font-size: 11px; color: var(--muted); min-height: 14px; padding-top: 5px; text-align: center; }
+
+/* ── Native sidebar compact variant ──
+   Applied when loaded inside Firefox's native sidebar container (~280px wide)
+   -------------------------------------------------------------------------- */
+.sidebar-compact .bar {
+  padding: 8px 10px;
+  gap: 6px;
+}
+.sidebar-compact .bar-actions select {
+  max-width: 80px;
+  font-size: 11px;
+  padding: 4px 6px;
+}
+.sidebar-compact .brand {
+  font-size: 13px;
+}
+.sidebar-compact .brand img {
+  width: 18px;
+  height: 18px;
+}
+.sidebar-compact .modes {
+  padding: 8px 10px 0;
+  gap: 4px;
+}
+.sidebar-compact .mode {
+  font-size: 11px;
+  padding: 5px 3px;
+}
+.sidebar-compact .messages {
+  padding: 10px 10px;
+}
+.sidebar-compact .msg {
+  max-width: 95%;
+  padding: 8px 11px;
+  font-size: 12.5px;
+}
+.sidebar-compact .composer {
+  padding: 8px 10px 10px;
+}
+.sidebar-compact textarea {
+  padding: 7px 10px;
+  font-size: 12.5px;
+}
+.sidebar-compact .send-btn {
+  width: 34px;
+  height: 34px;
+}
+.sidebar-compact .empty {
+  padding: 20px 8px;
+}
+.sidebar-compact .empty-mark {
+  font-size: 28px;
+}
+.sidebar-compact .empty h2 {
+  font-size: 14px;
+}
+.sidebar-compact .empty p {
+  font-size: 11.5px;
+}
+.sidebar-compact .chip {
+  padding: 5px 12px;
+  font-size: 11px;
+}

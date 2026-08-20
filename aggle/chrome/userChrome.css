@@ -1,213 +1,898 @@
-/* Aggle Liquid Glass — full skin for the LibreWolf chrome */
-/* Apply by copying into <profile>/chrome/userChrome.css and enabling user stylesheets */
+/* ============================================================================
+   Aggle Liquid Glass — Complete LibreWolf Chrome Skin
+   ============================================================================
+   Apply by copying into <profile>/chrome/userChrome.css
+   Enable via: toolkit.legacyUserProfileCustomizations.stylesheets = true
+   ============================================================================ */
 
 /* --------------------------------------------------------------------------
-   Design tokens (these override the embedded defaults — edit them to theme)
+   Design tokens — edit these to re-theme
    -------------------------------------------------------------------------- */
 :root {
-  --aggle-black:    #0A0A0A;
-  --aggle-panel:    #121214;
-  --aggle-panel-2:  #1A1A1E;
-  --aggle-line:     #26262B;
-  --aggle-text:     #EDEDEF;
-  --aggle-muted:    #9B9BA4;
-  --aggle-accent:   #FF5A1F;
-  --aggle-accent-2: #FF8A3D;
-  --aggle-blur:     24px;
-  --aggle-grain:    15%;
-  --aggle-radius:   14px;
+  --aggle-black:       #0A0A0A;
+  --aggle-panel:       #121214;
+  --aggle-panel-2:     #1A1A1E;
+  --aggle-panel-3:     #202026;
+  --aggle-line:        #26262B;
+  --aggle-line-bright: #33333A;
+  --aggle-text:        #EDEDEF;
+  --aggle-muted:       #9B9BA4;
+  --aggle-accent:      #FF5A1F;
+  --aggle-accent-2:    #FF8A3D;
+  --aggle-blur:        28px;
+  --aggle-blur-heavy:  40px;
+  --aggle-grain:       12%;
+  --aggle-radius:      12px;
+  --aggle-radius-sm:   8px;
+  --tab-height:        36px;
+  --nav-height:        44px;
 }
 
 /* OLED mode — pure black chrome, zero glow */
-html[style*="aggle-olive-mode"] :root,
-html[style*="aggle-olive-mode"] {
-  --aggle-black: #000000;
-  --aggle-panel: #060607;
-  --aggle-panel-2: #0E0E10;
+html[aggle-olive-mode] :root,
+body.oled-mode :root {
+  --aggle-black:       #000000;
+  --aggle-panel:       #060607;
+  --aggle-panel-2:     #0E0E10;
+  --aggle-panel-3:     #131316;
+  --aggle-line:        #1A1A1E;
+  --aggle-line-bright: #26262B;
 }
 
 /* --------------------------------------------------------------------------
-   Toolbar — frosted glass with grain texture and specular top edge
+   Reset — strip Firefox defaults
    -------------------------------------------------------------------------- */
-#navigator-toolbox {
-  background: linear-gradient(
-    180deg,
-    rgba(18,18,20,0.88) 0%,
-    rgba(10,10,10,0.78) 100%
-  ) !important;
-  backdrop-filter: blur(var(--aggle-blur)) saturate(160%) !important;
-  -webkit-backdrop-filter: blur(var(--aggle-blur)) saturate(160%) !important;
-  border-bottom: 1px solid rgba(255,255,255,0.06) !important;
-  position: relative;
-  overflow: hidden;
+#navigator-toolbox,
+#toolbar-window-buttons,
+#titlebar,
+#TabsToolbar,
+#nav-bar,
+#PersonalToolbar,
+#sidebar-box,
+#sidebar-splitter {
+  all: unset;
 }
 
-/* Specular highlight strip along the top edge */
+/* --------------------------------------------------------------------------
+   Main window layout
+   -------------------------------------------------------------------------- */
+#main-window {
+  --toolbar-bgcolor: transparent !important;
+  --toolbar-color: var(--aggle-text) !important;
+  --toolbarbutton-inner-padding: 6px !important;
+}
+
+/* --------------------------------------------------------------------------
+   Navigator toolbox — the container for all chrome
+   -------------------------------------------------------------------------- */
+#navigator-toolbox {
+  display: flex;
+  flex-direction: column;
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  position: relative;
+  z-index: 100;
+}
+
+/* Specular highlight — top edge of entire chrome */
 #navigator-toolbox::before {
   content: "";
-  position: absolute;
+  position: fixed;
   top: 0; left: 0; right: 0;
   height: 1px;
   background: linear-gradient(
     90deg,
     transparent 0%,
-    rgba(255,255,255,0.18) 50%,
+    rgba(255, 255, 255, 0.2) 40%,
+    rgba(255, 255, 255, 0.25) 50%,
+    rgba(255, 255, 255, 0.2) 60%,
     transparent 100%
   );
   pointer-events: none;
-  z-index: 10;
+  z-index: 200;
 }
 
-/* Subtle noise grain overlay — SVG filter applied via CSS */
+/* Film grain overlay on the entire chrome */
 #navigator-toolbox::after {
   content: "";
-  position: absolute;
-  inset: 0;
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  height: calc(var(--tab-height) + var(--nav-height) + 2px);
   pointer-events: none;
   opacity: var(--aggle-grain);
   background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
-  background-size: 120px 120px;
+  background-size: 100px 100px;
   mix-blend-mode: overlay;
-  z-index: 5;
+  z-index: 150;
 }
 
-/* Tabs toolbar */
-#TabsToolbar {
+/* --------------------------------------------------------------------------
+   TITLEBAR — macOS traffic lights + window controls
+   -------------------------------------------------------------------------- */
+#titlebar {
+  display: flex;
+  align-items: center;
+  height: 32px;
   background: transparent !important;
-  border-bottom: none !important;
-  padding: 6px 8px 4px !important;
+  -webkit-app-region: drag;
+  order: -2;
 }
 
-/* Tab strip — frosted glass strip */
-#tabbrowser-tabs {
+/* macOS traffic lights — left side */
+.titlebar-buttonbox-container {
+  position: absolute;
+  left: 12px;
+  top: 0;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  z-index: 10;
+  -webkit-app-region: no-drag;
+}
+
+/* Hide default titlebar text */
+#titlebar-title {
+  display: none !important;
+}
+
+/* Window buttons */
+.titlebar-button {
+  width: 12px !important;
+  height: 12px !important;
+  border-radius: 50% !important;
+  border: none !important;
+  margin: 0 5px !important;
+  padding: 0 !important;
+  position: relative;
+}
+.titlebar-buttonbox {
+  display: flex !important;
+  align-items: center;
+}
+.titlebar-button:hover { opacity: 0.8; }
+.titlebar-button:active { opacity: 0.6; }
+
+/* Close = red, Maximize = green, Minimize = yellow */
+.titlebar-button[tooltip-text="Close"] {
+  background: #FF5F57 !important;
+}
+.titlebar-button[tooltip-text="Minimize"] {
+  background: #FEBC2E !important;
+}
+.titlebar-button[tooltip-text="Maximize"] {
+  background: #28C840 !important;
+}
+
+/* --------------------------------------------------------------------------
+   TAB STRIP — thin glass bar, above the nav bar
+   -------------------------------------------------------------------------- */
+#TabsToolbar {
+  display: flex;
+  align-items: center;
+  height: var(--tab-height) !important;
+  padding: 0 8px !important;
   background: linear-gradient(
     180deg,
-    rgba(255,255,255,0.03) 0%,
-    transparent 100%
+    rgba(20, 20, 24, 0.82) 0%,
+    rgba(14, 14, 16, 0.72) 100%
   ) !important;
-  padding: 0 8px !important;
+  backdrop-filter: blur(32px) saturate(180%) !important;
+  -webkit-backdrop-filter: blur(32px) saturate(180%) !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05) !important;
+  order: -1;
+  position: relative;
+  gap: 2px;
+  overflow: hidden;
 }
 
-/* Individual tab — rounded, subtle glass */
+/* Bottom divider between tab strip and nav bar */
+#TabsToolbar::after {
+  content: "";
+  position: absolute;
+  bottom: 0; left: 0; right: 0;
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.06) 20%,
+    rgba(255, 255, 255, 0.08) 50%,
+    rgba(255, 255, 255, 0.06) 80%,
+    transparent 100%
+  );
+  pointer-events: none;
+}
+
+/* Tab browser tabs container */
+#tabbrowser-tabs {
+  display: flex;
+  align-items: center;
+  flex: 1;
+  min-width: 0;
+  height: 100%;
+  background: transparent !important;
+  padding: 0 4px !important;
+  gap: 2px;
+}
+
+/* Individual tab */
 .tabbrowser-tab {
-  background: rgba(255,255,255,0.04) !important;
-  border-radius: 10px !important;
-  margin: 2px 3px !important;
-  border: 1px solid rgba(255,255,255,0.06) !important;
-  transition: background 0.18s, border-color 0.18s !important;
-}
-.tabbrowser-tab:hover {
-  background: rgba(255,255,255,0.08) !important;
-  border-color: rgba(255,255,255,0.12) !important;
+  display: flex !important;
+  align-items: center;
+  height: 28px !important;
+  min-width: 60px !important;
+  max-width: 200px !important;
+  flex: 0 0 auto;
+  background: rgba(255, 255, 255, 0.04) !important;
+  border: 1px solid rgba(255, 255, 255, 0.06) !important;
+  border-radius: 8px !important;
+  margin: 0 1px !important;
+  padding: 0 8px !important;
+  transition: background 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease !important;
+  overflow: hidden;
 }
 
-/* Selected tab — ember gradient glow */
-.tabbrowser-tab[selected="true"] {
+.tabbrowser-tab:hover {
+  background: rgba(255, 255, 255, 0.08) !important;
+  border-color: rgba(255, 255, 255, 0.12) !important;
+}
+
+/* Selected/active tab — ember gradient glow */
+.tabbrowser-tab[selected] {
   background: linear-gradient(
     135deg,
-    rgba(255,90,31,0.28) 0%,
-    rgba(255,138,61,0.14) 100%
+    rgba(255, 90, 31, 0.32) 0%,
+    rgba(255, 138, 61, 0.16) 100%
   ) !important;
-  border-color: rgba(255,138,61,0.45) !important;
-  box-shadow: 0 0 18px rgba(255,90,31,0.18), inset 0 1px 0 rgba(255,255,255,0.08) !important;
+  border-color: rgba(255, 138, 61, 0.5) !important;
+  box-shadow:
+    0 0 16px rgba(255, 90, 31, 0.2),
+    inset 0 1px 0 rgba(255, 255, 255, 0.08) !important;
 }
 
-/* Tab close button — subtle, orange on hover */
+/* Tab label */
+.tab-label-container {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+}
+.tab-text {
+  font-size: 12px !important;
+  color: var(--aggle-text) !important;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.tabbrowser-tab[selected] .tab-text {
+  color: #fff !important;
+  text-shadow: 0 0 12px rgba(255, 138, 61, 0.4);
+}
+
+/* Tab favicon */
+.tab-icon-image {
+  width: 14px !important;
+  height: 14px !important;
+  margin-right: 6px;
+  flex-shrink: 0;
+  opacity: 0.85;
+}
+.tabbrowser-tab[selected] .tab-icon-image {
+  opacity: 1;
+}
+
+/* Tab close button — hidden until hover */
 .tab-close-button {
+  display: flex !important;
+  align-items: center;
+  justify-content: center;
+  width: 18px !important;
+  height: 18px !important;
+  border-radius: 6px !important;
+  margin-left: 4px !important;
   opacity: 0 !important;
-  transition: opacity 0.15s !important;
+  transition: opacity 0.15s ease !important;
+  flex-shrink: 0;
+  background: transparent !important;
+  border: none !important;
+  color: var(--aggle-muted) !important;
+  font-size: 10px !important;
+  cursor: pointer;
 }
 .tabbrowser-tab:hover .tab-close-button,
-.tabbrowser-tab[selected="true"] .tab-close-button {
+.tabbrowser-tab[selected] .tab-close-button {
   opacity: 0.7 !important;
 }
 .tab-close-button:hover {
   opacity: 1 !important;
-  background: rgba(255,107,107,0.18) !important;
+  background: rgba(255, 107, 107, 0.2) !important;
+  color: #FF6B6B !important;
+}
+
+/* Tab audio indicator */
+.tab-throbber,
+.tab-sharing-icon-overlay {
+  display: none !important;
+}
+
+/* New tab button */
+#tabs-newtab-button {
+  display: flex !important;
+  align-items: center;
+  justify-content: center;
+  width: 28px !important;
+  height: 28px !important;
+  border-radius: 8px !important;
+  background: rgba(255, 255, 255, 0.06) !important;
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+  color: var(--aggle-muted) !important;
+  font-size: 16px !important;
+  cursor: pointer;
+  transition: all 0.15s ease !important;
+  flex-shrink: 0;
+  margin-left: 2px;
+}
+#tabs-newtab-button:hover {
+  background: rgba(255, 90, 31, 0.15) !important;
+  border-color: rgba(255, 138, 61, 0.35) !important;
+  color: var(--aggle-accent-2) !important;
+}
+
+/* Tab overflow buttons */
+.tabbrowser-arrowscrollbox {
+  flex: 1;
+  min-width: 0;
 }
 
 /* --------------------------------------------------------------------------
-   Address bar — glass panel
+   NAV BAR — glass bar with address input, below the tab strip
    -------------------------------------------------------------------------- */
-#urlbar {
-  background: rgba(255,255,255,0.05) !important;
-  border: 1px solid rgba(255,255,255,0.08) !important;
-  border-radius: 12px !important;
-  backdrop-filter: blur(14px) !important;
-  -webkit-backdrop-filter: blur(14px) !important;
-  transition: border-color 0.18s, box-shadow 0.18s !important;
-}
-#urlbar:focus-within {
-  border-color: rgba(255,138,61,0.55) !important;
-  box-shadow: 0 0 0 3px rgba(255,90,31,0.15) !important;
-}
-
-/* --------------------------------------------------------------------------
-   Sidebar (Aggle AI) — glass panel
-   -------------------------------------------------------------------------- */
-#sidebar-box {
+#nav-bar {
+  display: flex;
+  align-items: center;
+  height: var(--nav-height) !important;
+  padding: 0 10px !important;
   background: linear-gradient(
     180deg,
-    rgba(18,18,20,0.92) 0%,
-    rgba(10,10,10,0.95) 100%
+    rgba(16, 16, 18, 0.90) 0%,
+    rgba(10, 10, 12, 0.85) 100%
   ) !important;
-  backdrop-filter: blur(var(--aggle-blur)) !important;
-  -webkit-backdrop-filter: blur(var(--aggle-blur)) !important;
-  border-left: 1px solid rgba(255,255,255,0.06) !important;
-  border-radius: var(--aggle-radius) 0 0 var(--aggle-radius) !important;
-  margin: 8px 0 8px 4px !important;
+  backdrop-filter: blur(28px) saturate(170%) !important;
+  -webkit-backdrop-filter: blur(28px) saturate(170%) !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.04) !important;
+  gap: 6px;
+  order: 0;
+  position: relative;
+}
+
+/* Subtle grain on nav bar */
+#nav-bar::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: calc(var(--aggle-grain) * 0.5);
+  background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='150' height='150'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-size: 80px 80px;
+  mix-blend-mode: overlay;
+}
+
+/* Navigation buttons (back, forward, reload) */
+#nav-bar .toolbarbutton-1 {
+  display: flex !important;
+  align-items: center;
+  justify-content: center;
+  width: 32px !important;
+  height: 32px !important;
+  border-radius: 9px !important;
+  background: rgba(255, 255, 255, 0.04) !important;
+  border: 1px solid rgba(255, 255, 255, 0.06) !important;
+  color: var(--aggle-muted) !important;
+  transition: all 0.15s ease !important;
+  flex-shrink: 0;
+}
+#nav-bar .toolbarbutton-1:hover {
+  background: rgba(255, 255, 255, 0.10) !important;
+  border-color: rgba(255, 255, 255, 0.14) !important;
+  color: var(--aggle-text) !important;
+}
+#nav-bar .toolbarbutton-1:active {
+  background: rgba(255, 255, 255, 0.06) !important;
+  transform: scale(0.94);
+}
+#nav-bar .toolbarbutton-1[disabled] {
+  opacity: 0.3 !important;
+  cursor: default;
+}
+
+/* Nav button icons */
+#nav-bar .toolbarbutton-1 > .toolbarbutton-icon {
+  width: 16px !important;
+  height: 16px !important;
+  opacity: 0.8;
+}
+#nav-bar .toolbarbutton-1:hover > .toolbarbutton-icon {
+  opacity: 1;
 }
 
 /* --------------------------------------------------------------------------
-   Bookmarks toolbar — subtle glass strip
+   ADDRESS BAR — glass pill, centered in nav bar
    -------------------------------------------------------------------------- */
-#PersonalToolbar {
-  background: rgba(255,255,255,0.02) !important;
-  border-bottom: 1px solid rgba(255,255,255,0.05) !important;
+#urlbar-container {
+  flex: 1;
+  max-width: 700px;
+  min-width: 200px;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  order: 10;
+  margin: 0 auto;
 }
 
-/* --------------------------------------------------------------------------
-   Panel / popup glass — menus, dropdowns, context menus
-   -------------------------------------------------------------------------- */
-#popup-containers, .panel, menupopup, panel {
+/* The urlbar wrapper */
+#urlbar {
+  width: 100% !important;
+  height: 100% !important;
+}
+
+#urlbar-background {
+  display: none !important;
+}
+
+#urlbar-input-container {
+  height: 34px !important;
+  background: rgba(255, 255, 255, 0.055) !important;
+  border: 1px solid rgba(255, 255, 255, 0.09) !important;
+  border-radius: 10px !important;
+  backdrop-filter: blur(18px) saturate(150%) !important;
+  -webkit-backdrop-filter: blur(18px) saturate(150%) !important;
+  box-shadow:
+    0 2px 12px rgba(0, 0, 0, 0.25),
+    inset 0 1px 0 rgba(255, 255, 255, 0.05) !important;
+  transition: all 0.18s ease !important;
+  padding: 0 4px !important;
+  gap: 0 !important;
+}
+
+#urlbar-input-container:hover {
+  background: rgba(255, 255, 255, 0.08) !important;
+  border-color: rgba(255, 255, 255, 0.14) !important;
+}
+
+#urlbar-input-container[focused],
+#urlbar-input-container[focus-within] {
+  background: rgba(30, 26, 22, 0.75) !important;
+  border-color: rgba(255, 138, 61, 0.55) !important;
+  box-shadow:
+    0 0 0 3px rgba(255, 90, 31, 0.14),
+    0 4px 20px rgba(0, 0, 0, 0.35),
+    inset 0 1px 0 rgba(255, 255, 255, 0.06) !important;
+}
+
+/* URL input text */
+#urlbar-input {
+  font-size: 13px !important;
+  color: var(--aggle-text) !important;
+  text-align: center !important;
+  padding: 0 8px !important;
+}
+#urlbar-input::placeholder {
+  color: var(--aggle-muted) !important;
+  opacity: 0.6;
+}
+
+/* URL bar buttons (left side — engine icon, search icon) */
+.urlbar-page-action,
+.urlbar-icon {
+  width: 26px !important;
+  height: 26px !important;
+  border-radius: 7px !important;
+  color: var(--aggle-muted) !important;
+  transition: all 0.15s ease !important;
+}
+.urlbar-page-action:hover,
+.urlbar-icon:hover {
+  background: rgba(255, 90, 31, 0.15) !important;
+  color: var(--aggle-accent-2) !important;
+}
+
+/* Hide the star/bookmark button (we handle via extension) */
+#star-button {
+  display: none !important;
+}
+
+/* URL bar split container */
+#urlbar-splitter {
+  display: none !important;
+}
+
+/* URL bar results dropdown */
+#urlbar-results {
   background: var(--aggle-panel) !important;
   border: 1px solid var(--aggle-line) !important;
   border-radius: var(--aggle-radius) !important;
-  box-shadow: 0 16px 48px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.06) !important;
+  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.65), inset 0 1px 0 rgba(255, 255, 255, 0.06) !important;
+  backdrop-filter: blur(32px) saturate(180%) !important;
+  -webkit-backdrop-filter: blur(32px) saturate(180%) !important;
+  margin-top: 4px !important;
+  padding: 6px !important;
+  max-height: 400px !important;
+  overflow-y: auto !important;
+}
+
+#urlbar-results::-webkit-scrollbar {
+  width: 6px;
+}
+#urlbar-results::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 3px;
+}
+
+/* URL bar result rows */
+.urlbar-row {
+  border-radius: var(--aggle-radius-sm) !important;
+  padding: 6px 10px !important;
+  margin: 2px 0 !important;
+  transition: background 0.12s ease !important;
+}
+.urlbar-row:hover,
+.urlbar-row[selected] {
+  background: linear-gradient(135deg, rgba(255, 90, 31, 0.18), rgba(255, 138, 61, 0.10)) !important;
+}
+.urlbar-row .urlbar-row-inner-container {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.urlbar-row .result-icon {
+  width: 16px !important;
+  height: 16px !important;
+  flex-shrink: 0;
+}
+.urlbar-row .result-text {
+  font-size: 12.5px !important;
+  color: var(--aggle-text) !important;
+}
+.urlbar-row .result-url {
+  font-size: 11px !important;
+  color: var(--aggle-muted) !important;
+}
+
+/* Search engine selector in urlbar */
+#urlbar-engine-button {
+  display: none !important;
 }
 
 /* --------------------------------------------------------------------------
-   Scrollbar — slim, glassy
+   RIGHT SIDE ACTIONS — sidebar toggle, extension buttons
+   -------------------------------------------------------------------------- */
+#nav-bar-right {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  order: 20;
+  flex-shrink: 0;
+}
+
+#nav-bar-right .toolbarbutton-1 {
+  width: 32px !important;
+  height: 32px !important;
+  border-radius: 9px !important;
+  background: rgba(255, 255, 255, 0.04) !important;
+  border: 1px solid rgba(255, 255, 255, 0.06) !important;
+  color: var(--aggle-muted) !important;
+  transition: all 0.15s ease !important;
+}
+#nav-bar-right .toolbarbutton-1:hover {
+  background: rgba(255, 90, 31, 0.15) !important;
+  border-color: rgba(255, 138, 61, 0.35) !important;
+  color: var(--aggle-accent-2) !important;
+}
+#nav-bar-right .toolbarbutton-1[checked] {
+  background: rgba(255, 90, 31, 0.22) !important;
+  border-color: rgba(255, 138, 61, 0.45) !important;
+  color: var(--aggle-accent-2) !important;
+}
+
+/* Aggle extension toolbar button */
+#aggle-button {
+  display: flex !important;
+  align-items: center;
+  justify-content: center;
+}
+
+/* --------------------------------------------------------------------------
+   BOOKMARKS TOOLBAR — hidden by default for cleaner look
+   -------------------------------------------------------------------------- */
+#PersonalToolbar {
+  display: none !important;
+}
+
+/* Show bookmarks toolbar when toggled */
+#main-window[show-bookmarks-bar="true"] #PersonalToolbar {
+  display: flex !important;
+  align-items: center;
+  height: 32px !important;
+  padding: 0 10px !important;
+  background: rgba(255, 255, 255, 0.02) !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.04) !important;
+}
+
+#PersonalToolbar .bookmark-item {
+  border-radius: 7px !important;
+  padding: 3px 8px !important;
+  font-size: 12px !important;
+  color: var(--aggle-muted) !important;
+  transition: all 0.12s ease !important;
+}
+#PersonalToolbar .bookmark-item:hover {
+  background: rgba(255, 255, 255, 0.08) !important;
+  color: var(--aggle-text) !important;
+}
+
+/* --------------------------------------------------------------------------
+   NATIVE SIDEBAR — Aggle AI panel
+   -------------------------------------------------------------------------- */
+#sidebar-box {
+  display: flex !important;
+  flex-direction: column;
+  background: linear-gradient(
+    180deg,
+    rgba(14, 14, 16, 0.95) 0%,
+    rgba(8, 8, 10, 0.97) 100%
+  ) !important;
+  backdrop-filter: blur(var(--aggle-blur-heavy)) saturate(170%) !important;
+  -webkit-backdrop-filter: blur(var(--aggle-blur-heavy)) saturate(170%) !important;
+  border-left: 1px solid rgba(255, 255, 255, 0.05) !important;
+  border-radius: var(--aggle-radius) 0 0 var(--aggle-radius) !important;
+  margin: 8px 0 8px 6px !important;
+  box-shadow: -4px 0 24px rgba(0, 0, 0, 0.4) !important;
+  overflow: hidden !important;
+}
+
+/* Sidebar header area */
+#sidebar-header {
+  background: transparent !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.04) !important;
+  padding: 8px 12px !important;
+}
+
+/* Sidebar content */
+#sidebar-content {
+  background: transparent !important;
+  border: none !important;
+}
+
+/* Sidebar splitter */
+#sidebar-splitter {
+  width: 4px !important;
+  background: transparent !important;
+  cursor: col-resize !important;
+}
+#sidebar-splitter:hover {
+  background: rgba(255, 90, 31, 0.2) !important;
+}
+
+/* Sidebar close button */
+#sidebar-close {
+  display: flex !important;
+  align-items: center;
+  justify-content: center;
+  width: 26px !important;
+  height: 26px !important;
+  border-radius: 7px !important;
+  background: rgba(255, 255, 255, 0.05) !important;
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+  color: var(--aggle-muted) !important;
+  cursor: pointer;
+  transition: all 0.15s ease !important;
+}
+#sidebar-close:hover {
+  background: rgba(255, 107, 107, 0.15) !important;
+  border-color: rgba(255, 107, 107, 0.35) !important;
+  color: #FF6B6B !important;
+}
+
+/* --------------------------------------------------------------------------
+   PANELS / POPUPS — menus, dropdowns, context menus
+   -------------------------------------------------------------------------- */
+#popup-containers,
+.panel,
+menupopup,
+panel,
+#contentAreaContextMenu,
+#toolbar-context-menu,
+#main-window menulist {
+  background: var(--aggle-panel) !important;
+  border: 1px solid var(--aggle-line) !important;
+  border-radius: var(--aggle-radius) !important;
+  box-shadow:
+    0 16px 48px rgba(0, 0, 0, 0.65),
+    inset 0 1px 0 rgba(255, 255, 255, 0.06) !important;
+  backdrop-filter: blur(32px) saturate(180%) !important;
+  -webkit-backdrop-filter: blur(32px) saturate(180%) !important;
+  padding: 6px !important;
+}
+
+/* Menu items */
+menupopup menuitem,
+menupopup menu,
+panel menuitem,
+panel menu {
+  margin: 2px 0 !important;
+  border-radius: var(--aggle-radius-sm) !important;
+  padding: 5px 12px !important;
+  color: var(--aggle-text) !important;
+  font-size: 13px !important;
+  transition: background 0.12s ease !important;
+}
+menupopup menuitem:hover,
+menupopup menu:hover,
+panel menuitem:hover,
+panel menu:hover {
+  background: linear-gradient(135deg, rgba(255, 90, 31, 0.18), rgba(255, 138, 61, 0.10)) !important;
+}
+
+menupopup menuseparator,
+panel menuseparator {
+  border-top: 1px solid var(--aggle-line) !important;
+  margin: 4px 0 !important;
+  padding: 0 !important;
+}
+
+/* --------------------------------------------------------------------------
+   TOOLTIPS — glass
+   -------------------------------------------------------------------------- */
+tooltip {
+  background: var(--aggle-panel) !important;
+  border: 1px solid var(--aggle-line) !important;
+  border-radius: var(--aggle-radius-sm) !important;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.55), inset 0 1px 0 rgba(255, 255, 255, 0.06) !important;
+  backdrop-filter: blur(20px) saturate(160%) !important;
+  -webkit-backdrop-filter: blur(20px) saturate(160%) !important;
+  color: var(--aggle-text) !important;
+  padding: 5px 10px !important;
+  font-size: 12px !important;
+}
+
+/* --------------------------------------------------------------------------
+   SCROLLBARS — slim, glassy
    -------------------------------------------------------------------------- */
 #navigator-toolbox scrollbox,
 scrollbox {
   scrollbar-width: thin;
-  scrollbar-color: rgba(255,255,255,0.1) transparent;
+  scrollbar-color: rgba(255, 255, 255, 0.08) transparent;
 }
+
 scrollbar {
   width: 8px;
+  height: 8px;
 }
+
 scrollbar-thumb {
-  background: rgba(255,255,255,0.12) !important;
+  background: rgba(255, 255, 255, 0.10) !important;
   border-radius: 4px;
 }
 scrollbar-thumb:hover {
-  background: rgba(255,255,255,0.2) !important;
+  background: rgba(255, 255, 255, 0.18) !important;
+}
+
+scrollbar-corner {
+  background: transparent !important;
 }
 
 /* --------------------------------------------------------------------------
-   OLED mode — pure black backgrounds (applied via a prefs override in
-   librewolf.overrides.cfg or user.js)
+   AUTO-HIDE TOOLBAR (scroll-down hides, scroll-up reveals)
    -------------------------------------------------------------------------- */
-/* The CSS here is the visual layer; the real black is set by prefs */
-
-/* --------------------------------------------------------------------------
-   Auto-hide toolbar (scroll-down hides it, scroll-up reveals)
-   -------------------------------------------------------------------------- */
-#navigator-toolbox {
-  transition: transform 0.25s ease;
+#navigator-toolbox[autohide] {
+  transition: transform 0.25s ease !important;
 }
 #main-window[inFullscreen="true"] #navigator-toolbox,
-#main-window:not([customizing="true"]) #navigator-toolbox {
-  /* Controlled via JS — see the extension's content script */
+#main-window:not([customizing="true"]) #navigator-toolbox[autohide="true"] {
+  transform: translateY(-100%);
+}
+#main-window[inFullscreen="true"] #navigator-toolbox:hover,
+#main-window[inFullscreen="true"] #navigator-toolbox:focus-within,
+#main-window:not([customizing="true"]) #navigator-toolbox[autohide="true"]:hover,
+#main-window:not([customizing="true"]) #navigator-toolbox[autohide="true"]:focus-within {
+  transform: translateY(0);
+}
+
+/* --------------------------------------------------------------------------
+   LOADING / PROGRESS BAR
+   -------------------------------------------------------------------------- */
+#tabbrowser-tabs[positionpinnedtabs] > #tabbrowser-arrowscrollbox > .tabbrowser-tab[selected]::after {
+  /* Progress indicator removed — cleaner look */
+  display: none !important;
+}
+
+/* --------------------------------------------------------------------------
+   FIND BAR — glass
+   -------------------------------------------------------------------------- */
+#findbar {
+  background: var(--aggle-panel) !important;
+  border: 1px solid var(--aggle-line) !important;
+  border-radius: var(--aggle-radius) !important;
+  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.06) !important;
+  backdrop-filter: blur(28px) saturate(170%) !important;
+  -webkit-backdrop-filter: blur(28px) saturate(170%) !important;
+  padding: 8px 12px !important;
+}
+
+#findbar .findbar-textbox {
+  background: var(--aggle-panel-2) !important;
+  border: 1px solid var(--aggle-line) !important;
+  border-radius: var(--aggle-radius-sm) !important;
+  color: var(--aggle-text) !important;
+  padding: 6px 10px !important;
+  font-size: 13px !important;
+}
+#findbar .findbar-textbox:focus {
+  border-color: rgba(255, 138, 61, 0.5) !important;
+  box-shadow: 0 0 0 3px rgba(255, 90, 31, 0.12) !important;
+}
+
+/* --------------------------------------------------------------------------
+   DOWNLOADS BAR — glass
+   -------------------------------------------------------------------------- */
+#downloads-indicator {
+  display: none !important;
+}
+
+#downloadsPanel {
+  display: none !important;
+}
+
+/* --------------------------------------------------------------------------
+   ZOOM CONTROLS — subtle
+   -------------------------------------------------------------------------- */
+#zoom-controls {
+  display: flex !important;
+  align-items: center;
+  gap: 2px;
+}
+#zoom-controls .toolbarbutton-1 {
+  width: 26px !important;
+  height: 26px !important;
+  border-radius: 7px !important;
+  background: rgba(255, 255, 255, 0.04) !important;
+  border: 1px solid rgba(255, 255, 255, 0.06) !important;
+  color: var(--aggle-muted) !important;
+  font-size: 14px !important;
+}
+#zoom-controls .toolbarbutton-1:hover {
+  background: rgba(255, 255, 255, 0.10) !important;
+  color: var(--aggle-text) !important;
+}
+
+/* --------------------------------------------------------------------------
+   MACOS TITLEBAR SPACING — compensate for traffic lights
+   -------------------------------------------------------------------------- */
+#titlebar {
+  padding-left: 76px !important; /* Space for traffic lights */
+}
+
+/* --------------------------------------------------------------------------
+   COMPACT VIEW — for smaller windows
+   -------------------------------------------------------------------------- */
+#main-window[aggle-compact-chrome] #TabsToolbar {
+  --tab-height: 30px;
+}
+#main-window[aggle-compact-chrome] #nav-bar {
+  --nav-height: 38px;
+}
+#main-window[aggle-compact-chrome] .tabbrowser-tab {
+  height: 24px !important;
+  min-width: 50px !important;
+}
+
+/* --------------------------------------------------------------------------
+   LOADING SCREEN — smooth entry
+   -------------------------------------------------------------------------- */
+@keyframes aggle-chrome-in {
+  from { opacity: 0; transform: translateY(-4px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+#navigator-toolbox {
+  animation: aggle-chrome-in 0.2s ease;
 }

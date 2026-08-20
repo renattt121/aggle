@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <!-- App identity -->
+    <key>CFBundleExecutable</key>
+    <string>aggle-launcher</string>
+    <key>CFBundleIdentifier</key>
+    <string>com.aggle.browser</string>
+    <key>CFBundleName</key>
+    <string>Aggle</string>
+    <key>CFBundleDisplayName</key>
+    <string>Aggle</string>
+    <key>CFBundleVersion</key>
+    <string>1.0.0</string>
+    <key>CFBundleShortVersionString</key>
+    <string>1.0.0</string>
+
+    <!-- Bundle type -->
+    <key>CFBundlePackageType</key>
+    <string>APPL</string>
+    <key>CFBundleSignature</key>
+    <string>????</string>
+
+    <!-- Icon -->
+    <key>CFBundleIconFile</key>
+    <string>Aggle</string>
+    <key>CFBundleIconName</key>
+    <string>Aggle</string>
+
+    <!-- Minimum macOS version -->
+    <key>LSMinimumSystemVersion</key>
+    <string>13.0</string>
+
+    <!-- Supported file types -->
+    <key>CFBundleDocumentTypes</key>
+    <array>
+        <dict>
+            <key>CFBundleTypeName</key>
+            <string>HTML Document</string>
+            <key>CFBundleTypeRole</key>
+            <string>Viewer</string>
+            <key>LSItemContentTypes</key>
+            <array>
+                <string>public.html</string>
+                <string>public.xhtml</string>
+            </array>
+        </dict>
+    </array>
+
+    <!-- Background execution (don't show in Dock by default — LibreWolf does) -->
+    <key>LSUIElement</key>
+    <false/>
+
+    <!-- High resolution support -->
+    <key>NSHighResolutionCapable</key>
+    <true/>
+
+    <!-- Security — allow LibreWolf subprocess -->
+    <key>NSAppTransportSecurity</key>
+    <dict>
+        <key>NSAllowsArbitraryLoads</key>
+        <true/>
+    </dict>
+
+    <!-- Categories -->
+    <key>LSApplicationCategoryType</key>
+    <string>public.app-category.web-browsing</string>
+
+    <!-- Handle URLs -->
+    <key>CFBundleURLTypes</key>
+    <array>
+        <dict>
+            <key>CFBundleURLName</key>
+            <string>Aggle Browser</string>
+            <key>CFBundleURLSchemes</key>
+            <array>
+                <string>http</string>
+                <string>https</string>
+                <string>ftp</string>
+                <string>file</string>
+            </array>
+        </dict>
+    </array>
+</dict>
+</plist>
