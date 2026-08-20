@@ -1,16 +1,27 @@
 {
   "name": "aggle-browser",
-  "version": "0.1.0",
+  "version": "0.2.0-beta.5",
   "description": "Aggle - Premium privacy browser layer for LibreWolf",
   "scripts": {
     "dev": "node esbuild.ext.config.mjs",
     "build": "node esbuild.ext.config.mjs prod",
-    "start": "web-ext run --source-dir extension --target firefox-desktop"
+    "start": "web-ext run --source-dir extension --target firefox-desktop",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:e2e": "vitest run --config vitest.browser.config.ts",
+    "test:e2e:ui": "vitest --config vitest.browser.config.ts --ui"
   },
   "devDependencies": {
+    "@playwright/browser-firefox": "^1.62.1",
+    "@playwright/test": "^1.62.1",
     "@types/firefox-webext-browser": "^143.0.0",
+    "@types/node": "^26.2.0",
+    "@vitest/browser": "^4.1.11",
+    "@vitest/ui": "^4.1.11",
     "esbuild": "^0.21.0",
+    "playwright": "^1.62.1",
     "typescript": "^5.4.0",
+    "vitest": "^4.1.11",
     "web-ext": "^7.8.0"
   }
 }
