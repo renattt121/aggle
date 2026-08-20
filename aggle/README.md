@@ -37,7 +37,6 @@ Premium privacy browser for **macOS** — LibreWolf, re-skinned with glassmorphi
 The project is in the `aggle/` subdirectory:
 
 ```bash
-cd aggle          # ← required — package.json is here, not at repo root
 cd aggle
 npm install
 npm run build
