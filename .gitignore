@@ -1,0 +1,17 @@
+# OS files
+.DS_Store
+Thumbs.db
+
+# Dependencies
+node_modules/
+
+# Build outputs & artifacts
+dist/
+build/
+*.dmg
+*.zip
+.system_generated/
+scratch/
+
+# Allow pre-bundled extension package in Aggle-Windows
+!Aggle-Windows/extension/aggle-extension.xpi

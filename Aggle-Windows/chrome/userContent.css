@@ -1,0 +1,433 @@
+/* ============================================================================
+   Aggle userContent — New tab, home page, context menus, sidebar styling
+   ============================================================================ */
+
+/* --------------------------------------------------------------------------
+   New tab / home — dark background matching chrome
+   -------------------------------------------------------------------------- */
+@-moz-document url("about:newtab"), url("about:home") {
+  *, *::before, *::after {
+    color-scheme: dark;
+  }
+
+  html, body {
+    background: #0A0A0A !important;
+    color: #EDEDEF !important;
+  }
+
+  /* Remove default Aggle search bar glow */
+  .search-wrapper,
+  .search-container,
+  .logo-and-wordmark {
+    color: inherit;
+  }
+
+  /* Quick links container */
+  .quicklinks-inner {
+    background: transparent !important;
+  }
+
+  .tile {
+    border-radius: 12px !important;
+    transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.25s cubic-bezier(0.4, 0, 0.2, 1) !important;
+  }
+  .tile:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4) !important;
+  }
+}
+
+/* --------------------------------------------------------------------------
+   OLED mode — pure black new tab
+   -------------------------------------------------------------------------- */
+@-moz-document url("about:newtab"), url("about:home") {
+  html[aggle-olive-mode] body,
+  html[aggle-olive-mode] {
+    background: #000000 !important;
+  }
+}
+
+/* --------------------------------------------------------------------------
+   Context menu — glass
+   -------------------------------------------------------------------------- */
+menupopup,
+#contentAreaContextMenu,
+#toolbar-context-menu,
+#main-context-menu,
+menulist {
+  background: #131316 !important;
+  border: 1px solid #26262B !important;
+  border-radius: 12px !important;
+  box-shadow: 0 12px 36px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.06) !important;
+  padding: 6px !important;
+  backdrop-filter: blur(24px) saturate(160%) !important;
+  -webkit-backdrop-filter: blur(24px) saturate(160%) !important;
+}
+
+menupopup menuitem,
+menupopup menu,
+menupopup menuseparator {
+  margin: 2px 0 !important;
+  border-radius: 7px !important;
+  padding: 4px 10px !important;
+}
+menupopup menuitem:hover,
+menupopup menu:hover {
+  background: linear-gradient(135deg, rgba(255,90,31,0.18), rgba(255,138,61,0.10)) !important;
+}
+menupopup menuseparator {
+  border-top: 1px solid #26262B !important;
+  margin: 4px 0 !important;
+}
+
+/* --------------------------------------------------------------------------
+   Tooltip — glass
+   -------------------------------------------------------------------------- */
+tooltip {
+  background: #131316 !important;
+  border: 1px solid #26262B !important;
+  border-radius: 10px !important;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.55) !important;
+  color: #EDEDEF !important;
+  padding: 6px 10px !important;
+  backdrop-filter: blur(18px) !important;
+  -webkit-backdrop-filter: blur(18px) !important;
+}
+
+/* --------------------------------------------------------------------------
+   Sidebar panel — native sidebar styling
+   -------------------------------------------------------------------------- */
+@-moz-document url-prefix("moz-extension://") {
+  /* When the Aggle sidebar panel is loaded in the native sidebar container */
+  #sidebar-box #sidebar-content iframe,
+  #sidebar-box #sidebar-content browser {
+    border: none !important;
+    background: #0A0A0A !important;
+  }
+}
+
+/* --------------------------------------------------------------------------
+   Scrollbars in content area
+   -------------------------------------------------------------------------- */
+scrollbar {
+  width: 8px;
+  height: 8px;
+}
+scrollbar-thumb {
+  background: rgba(255,255,255,0.10) !important;
+  border-radius: 4px;
+}
+scrollbar-thumb:hover {
+  background: rgba(255,255,255,0.18) !important;
+}
+
+/* --------------------------------------------------------------------------
+   Selection color — ember accent
+   -------------------------------------------------------------------------- */
+::selection {
+  background: rgba(255, 90, 31, 0.3) !important;
+  color: #fff !important;
+}
+
+/* NOTE: deliberately NO global button / input / link / focus restyling here.
+   Earlier versions force-styled form controls and links on every website
+   with !important (padding, colors, border-radius). That resized inputs and
+   buttons on third-party pages and collided with their layouts. Site-specific
+   styling below (about: pages, the sidebar) is scoped with @-moz-document. */
+
+/* ============================================================================
+   BUG FIXES — newtab overlay, sidebar panel, responsive scaling
+   ============================================================================ */
+
+/* --- 1. NEWTAB SEARCH: recolor only. Never force widths on stock Activity
+   Stream internals — the clamped widths used to collide with its flex
+   layout when the stock newtab slipped through (typed about:newtab). --- */
+@-moz-document url("about:newtab"), url("about:home") {
+  .search-wrapper input,
+  .search-container input {
+    outline: none !important;
+    border-radius: 12px !important;
+  }
+
+  /* Kill any runaway dropdowns */
+  .search-wrapper .autocomplete-richlistbox,
+  .search-container .autocomplete-richlistbox {
+    max-height: 300px !important;
+    overflow-y: auto !important;
+    outline: none !important;
+  }
+}
+
+/* --- 2. SIDEBAR PANEL FIX: constrain panel when rendered in native sidebar --- */
+@-moz-document url-prefix("moz-extension://") {
+  #sidebar-box #sidebar-content iframe,
+  #sidebar-box #sidebar-content browser {
+    width: 100% !important;
+    height: 100% !important;
+    border: none !important;
+    outline: none !important;
+  }
+
+  /* Kill any cyan focus rings inside the sidebar panel */
+  #sidebar-box * {
+    outline: none !important;
+  }
+
+  /* Ensure panel body doesn't overflow */
+  #sidebar-box body,
+  #sidebar-box html {
+    overflow: hidden !important;
+    height: 100% !important;
+    width: 100% !important;
+  }
+}
+
+/* ============================================================================
+   FIX: New Tab "Customize" panel breaks the page layout
+   When the wallpapers/shortcuts panel opens, keep the dark background
+   stable, lock the logo dimensions so it cannot be squashed, and turn the
+   panel into a fixed overlay so it never reflows the main viewport.
+   ============================================================================ */
+@-moz-document url("about:newtab"), url("about:home") {
+  /* Background must stay dark whether or not the customizer is open */
+  body,
+  body.customizing,
+  main {
+    background: #0A0A0A !important;
+    background-color: #0A0A0A !important;
+    background-image: none !important;
+    color: #EDEDEF !important;
+  }
+
+  /* Lock logo/wordmark dimensions — the panel must not squash them */
+  .logo-and-wordmark {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 12px !important;
+    max-width: 320px !important;
+    flex: 0 0 auto !important;
+    min-width: 0 !important;
+  }
+  .logo-and-wordmark .logo {
+    width: 82px !important;
+    height: auto !important;
+    flex: 0 0 auto !important;
+    min-width: 0 !important;
+  }
+  .logo-and-wordmark .wordmark {
+    width: auto !important;
+    height: 28px !important;
+    flex: 0 0 auto !important;
+    min-width: 0 !important;
+  }
+
+  /* Hide the rest of the garbage */
+  .customize-menu {
+    position: fixed !important;
+    top: 0 !important;
+    right: 0 !important;
+    bottom: 0 !important;
+    height: 100% !important;
+    max-width: 320px !important;
+    z-index: 2147483646 !important;
+    background: #131316 !important;
+    border-left: 1px solid #26262B !important;
+    box-shadow: -12px 0 40px rgba(0, 0, 0, 0.5) !important;
+    color: #EDEDEF !important;
+  }
+}
+
+
+/* ============================================================================
+   ULTRA-MINIMALIST PRIVATE BROWSING
+   ============================================================================ */
+@-moz-document url("about:privatebrowsing") {
+  * { background-image: none !important; box-shadow: none !important; }
+  
+  html, body {
+    background-color: #050505 !important;
+    height: 100vh !important;
+    margin: 0 !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    justify-content: center !important;
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", Roboto, sans-serif !important;
+    overflow: hidden !important;
+  }
+
+  /* Hide absolutely everything native to avoid broken UI elements */
+  body > * {
+    display: none !important;
+  }
+
+  /* Glowing Orb Background */
+  body::before {
+    content: "" !important;
+    position: absolute !important;
+    top: 50% !important;
+    left: 50% !important;
+    width: 800px !important;
+    height: 800px !important;
+    background: radial-gradient(circle, rgba(255, 90, 31, 0.08) 0%, rgba(138, 43, 226, 0.04) 40%, transparent 70%) !important;
+    transform: translate(-50%, -50%) !important;
+    z-index: 0 !important;
+    pointer-events: none !important;
+  }
+
+  /* The Container for Icon & Text */
+  html::after {
+    content: "Private Session" !important;
+    display: block !important;
+    position: absolute !important;
+    top: 50% !important;
+    left: 50% !important;
+    transform: translate(-50%, -60%) !important;
+    z-index: 1 !important;
+    
+    /* Background Shield Icon */
+    background: url("data:image/svg+xml;utf8,<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"48\" height=\"48\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"%23FF5A1F\" stroke-width=\"1.5\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z\"></path></svg>") center top no-repeat !important;
+    
+    /* Title Text */
+    padding-top: 72px !important;
+    font-size: 36px !important;
+    font-weight: 700 !important;
+    letter-spacing: -0.03em !important;
+    color: #FFFFFF !important;
+    text-align: center !important;
+  }
+
+  body::after {
+    content: "Advanced tracking protection is enforced.\A Your traffic is encrypted and your history vanishes when closed." !important;
+    display: block !important;
+    position: absolute !important;
+    top: 50% !important;
+    left: 50% !important;
+    transform: translate(-50%, 60px) !important;
+    z-index: 1 !important;
+    
+    /* Subtitle Text */
+    white-space: pre-wrap !important;
+    text-align: center !important;
+    width: 100% !important;
+    max-width: 440px !important;
+    font-size: 15px !important;
+    line-height: 1.6 !important;
+    color: #9B9BA4 !important;
+  }
+}
+
+/* ============================================================================
+   AGGLE INTERNAL UI STYLING (about:preferences, about:addons, etc.)
+   Makes Firefox's native settings pages look like an Aggle product.
+   ============================================================================ */
+@-moz-document url-prefix("about:preferences"), 
+               url-prefix("about:addons"), 
+               url-prefix("about:downloads"), 
+               url-prefix("about:config"), 
+               url-prefix("about:profiles"), 
+               url-prefix("about:support") {
+  
+  :root {
+    --in-content-page-background: #0A0A0A !important;
+    --in-content-box-background: #131316 !important;
+    --in-content-box-info-background: rgba(255, 255, 255, 0.04) !important;
+    
+    --in-content-text-color: #EDEDEF !important;
+    --in-content-page-color: #EDEDEF !important;
+    
+    --in-content-primary-button-background: #FF5A1F !important;
+    --in-content-primary-button-background-hover: #FF703D !important;
+    --in-content-primary-button-background-active: #E04812 !important;
+    --in-content-primary-button-text-color: #FFFFFF !important;
+    
+    --in-content-button-background: rgba(255, 255, 255, 0.08) !important;
+    --in-content-button-background-hover: rgba(255, 255, 255, 0.12) !important;
+    --in-content-button-background-active: rgba(255, 255, 255, 0.16) !important;
+    --in-content-button-text-color: #EDEDEF !important;
+    
+    --in-content-border-color: rgba(255, 255, 255, 0.08) !important;
+    --in-content-border-hover: rgba(255, 255, 255, 0.15) !important;
+    --in-content-border-active: #FF5A1F !important;
+    
+    --in-content-link-color: #FF5A1F !important;
+    --in-content-link-color-hover: #FF703D !important;
+    
+    /* Input fields */
+    --in-content-box-border-color: rgba(255, 255, 255, 0.1) !important;
+    --in-content-item-hover: rgba(255, 255, 255, 0.05) !important;
+    --in-content-item-selected: rgba(255, 90, 31, 0.15) !important;
+  }
+
+  /* Smooth animations */
+  * {
+    transition: background-color 150ms ease, border-color 150ms ease, color 150ms ease, box-shadow 150ms ease !important;
+  }
+
+  /* Make containers glassy */
+  .category, 
+  .main-content, 
+  #categories,
+  groupbox, 
+  richlistbox {
+    background: transparent !important;
+  }
+
+  /* Style inputs and buttons to be rounded and sleek */
+  input[type="text"], 
+  input[type="search"], 
+  button, 
+  menulist, 
+  select {
+    border-radius: 8px !important;
+    border: 1px solid var(--in-content-border-color) !important;
+    background: var(--in-content-button-background) !important;
+    color: var(--in-content-text-color) !important;
+  }
+
+  input[type="text"]:focus, 
+  input[type="search"]:focus, 
+  menulist:focus {
+    border-color: #FF5A1F !important;
+    box-shadow: 0 0 0 3px rgba(255, 90, 31, 0.2) !important;
+    outline: none !important;
+  }
+
+  /* Categories Sidebar in Preferences/Addons */
+  #categories > .category {
+    border-radius: 8px !important;
+    margin: 2px 8px !important;
+    padding: 8px !important;
+  }
+  #categories > .category[selected],
+  #categories > .category.selected {
+    background-color: rgba(255, 90, 31, 0.15) !important;
+    color: #FF5A1F !important;
+  }
+  #categories > .category:hover:not([selected]):not(.selected) {
+    background-color: rgba(255, 255, 255, 0.06) !important;
+  }
+  
+  /* Toggle Switches */
+  checkbox {
+    border-radius: 12px !important;
+  }
+}
+
+/* ============================================================================
+   GLOBAL EXTENSION UI (Dark Mode Base)
+   Attempts to force a sleek dark mode onto 3rd party extension popups/pages
+   that don't explicitly set their own background colors.
+   ============================================================================ */
+@-moz-document url-prefix("moz-extension://") {
+  :root {
+    color-scheme: dark !important;
+  }
+  
+  html, body {
+    /* We don't use !important here so extensions can override it if they specifically want to */
+    background-color: #131316;
+    color: #EDEDEF;
+  }
+}

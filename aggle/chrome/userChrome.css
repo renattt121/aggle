@@ -1,14 +1,22 @@
 /* ============================================================================
-   Aggle Liquid Glass — Complete Aggle Chrome Skin
+   Aggle Liquid Glass — Conservative Chrome Skin
    ============================================================================
-   Apply by copying into <profile>/chrome/userChrome.css
+   Copy into <profile>/chrome/userChrome.css
    Enable via: toolkit.legacyUserProfileCustomizations.stylesheets = true
+
+   IMPORTANT: this file deliberately NEVER touches `display`, `flex`,
+   `position`, or `all: unset` on XUL containers (#navigator-toolbox, the
+   toolbars, #sidebar-box, .tabbrowser-tab…). Those properties drive
+   Firefox's native box layout; overriding them is what previously made the
+   chrome collapse, overlap, and blow the urlbar up to full-screen height.
+   Only colors, borders, radii, padding and opacity are styled here.
    ============================================================================ */
 
 /* --------------------------------------------------------------------------
    Design tokens — edit these to re-theme
    -------------------------------------------------------------------------- */
 :root {
+  --focus-outline-color: transparent !important;
   --aggle-black:       #0A0A0A;
   --aggle-panel:       #121214;
   --aggle-panel-2:     #1A1A1E;
@@ -26,11 +34,14 @@
   --aggle-radius-sm:   8px;
   --tab-height:        36px;
   --nav-height:        44px;
+  --ease-smooth:       cubic-bezier(0.4, 0, 0.2, 1);
+  --ease-spring:       cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
 /* OLED mode — pure black chrome, zero glow */
 html[aggle-olive-mode] :root,
 body.oled-mode :root {
+  --focus-outline-color: transparent !important;
   --aggle-black:       #000000;
   --aggle-panel:       #060607;
   --aggle-panel-2:     #0E0E10;
@@ -40,138 +51,42 @@ body.oled-mode :root {
 }
 
 /* --------------------------------------------------------------------------
-   Reset — strip Firefox defaults
+   Main window — feed Firefox's own theme variables.
+   Firefox sizes and lays out everything; we only recolor it.
    -------------------------------------------------------------------------- */
-#navigator-toolbox,
-#toolbar-window-buttons,
-#titlebar,
-#TabsToolbar,
-#nav-bar,
-#PersonalToolbar,
-#sidebar-box,
-#sidebar-splitter {
-  all: unset;
-}
-
-/* --------------------------------------------------------------------------
-   Main window layout
-   -------------------------------------------------------------------------- */
-#main-window {
+#main-window,
+:root {
+  --focus-outline-color: transparent !important;
+  scroll-behavior: smooth !important;
+  -webkit-overflow-scrolling: touch !important;
   --toolbar-bgcolor: transparent !important;
   --toolbar-color: var(--aggle-text) !important;
   --toolbarbutton-inner-padding: 6px !important;
+  --lwt-toolbar-field-background-color: rgba(255, 255, 255, 0.05) !important;
+  --lwt-toolbar-field-color: var(--aggle-text) !important;
+  --lwt-toolbar-field-focus: rgba(255, 255, 255, 0.1) !important;
+  --arrowpanel-background: var(--aggle-panel) !important;
+  --arrowpanel-color: var(--aggle-text) !important;
+  --arrowpanel-border-color: var(--aggle-line) !important;
+  --panel-separator-color: var(--aggle-line) !important;
+  --toolbar-field-focus-border-color: rgba(255, 255, 255, 0.2) !important;
+  --toolbar-field-highlight-background: rgba(255, 90, 31, 0.25) !important;
+  --toolbar-field-highlight-color: #fff !important;
 }
 
 /* --------------------------------------------------------------------------
-   Navigator toolbox — the container for all chrome
+   Navigator toolbox — recolor only
    -------------------------------------------------------------------------- */
 #navigator-toolbox {
-  display: flex;
-  flex-direction: column;
   background: transparent !important;
   border: none !important;
   box-shadow: none !important;
-  position: relative;
-  z-index: 100;
-}
-
-/* Specular highlight — top edge of entire chrome */
-#navigator-toolbox::before {
-  content: "";
-  position: fixed;
-  top: 0; left: 0; right: 0;
-  height: 1px;
-  background: linear-gradient(
-    90deg,
-    transparent 0%,
-    rgba(255, 255, 255, 0.2) 40%,
-    rgba(255, 255, 255, 0.25) 50%,
-    rgba(255, 255, 255, 0.2) 60%,
-    transparent 100%
-  );
-  pointer-events: none;
-  z-index: 200;
-}
-
-/* Film grain overlay on the entire chrome */
-#navigator-toolbox::after {
-  content: "";
-  position: fixed;
-  top: 0; left: 0; right: 0;
-  height: calc(var(--tab-height) + var(--nav-height) + 2px);
-  pointer-events: none;
-  opacity: var(--aggle-grain);
-  background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
-  background-size: 100px 100px;
-  mix-blend-mode: overlay;
-  z-index: 150;
 }
 
 /* --------------------------------------------------------------------------
-   TITLEBAR — macOS traffic lights + window controls
-   -------------------------------------------------------------------------- */
-#titlebar {
-  display: flex;
-  align-items: center;
-  height: 32px;
-  background: transparent !important;
-  -webkit-app-region: drag;
-  order: -2;
-}
-
-/* macOS traffic lights — left side */
-.titlebar-buttonbox-container {
-  position: absolute;
-  left: 12px;
-  top: 0;
-  height: 100%;
-  display: flex;
-  align-items: center;
-  z-index: 10;
-  -webkit-app-region: no-drag;
-}
-
-/* Hide default titlebar text */
-#titlebar-title {
-  display: none !important;
-}
-
-/* Window buttons */
-.titlebar-button {
-  width: 12px !important;
-  height: 12px !important;
-  border-radius: 50% !important;
-  border: none !important;
-  margin: 0 5px !important;
-  padding: 0 !important;
-  position: relative;
-}
-.titlebar-buttonbox {
-  display: flex !important;
-  align-items: center;
-}
-.titlebar-button:hover { opacity: 0.8; }
-.titlebar-button:active { opacity: 0.6; }
-
-/* Close = red, Maximize = green, Minimize = yellow */
-.titlebar-button[tooltip-text="Close"] {
-  background: #FF5F57 !important;
-}
-.titlebar-button[tooltip-text="Minimize"] {
-  background: #FEBC2E !important;
-}
-.titlebar-button[tooltip-text="Maximize"] {
-  background: #28C840 !important;
-}
-
-/* --------------------------------------------------------------------------
-   TAB STRIP — thin glass bar, above the nav bar
+   TAB STRIP
    -------------------------------------------------------------------------- */
 #TabsToolbar {
-  display: flex;
-  align-items: center;
-  height: var(--tab-height) !important;
-  padding: 0 8px !important;
   background: linear-gradient(
     180deg,
     rgba(20, 20, 24, 0.82) 0%,
@@ -180,56 +95,23 @@ body.oled-mode :root {
   backdrop-filter: blur(32px) saturate(180%) !important;
   -webkit-backdrop-filter: blur(32px) saturate(180%) !important;
   border-bottom: 1px solid rgba(255, 255, 255, 0.05) !important;
-  order: -1;
-  position: relative;
-  gap: 2px;
-  overflow: hidden;
+  color: var(--aggle-text) !important;
 }
 
-/* Bottom divider between tab strip and nav bar */
-#TabsToolbar::after {
-  content: "";
-  position: absolute;
-  bottom: 0; left: 0; right: 0;
-  height: 1px;
-  background: linear-gradient(
-    90deg,
-    transparent 0%,
-    rgba(255, 255, 255, 0.06) 20%,
-    rgba(255, 255, 255, 0.08) 50%,
-    rgba(255, 255, 255, 0.06) 80%,
-    transparent 100%
-  );
-  pointer-events: none;
+/* Tabs toolbar collapsed into titlebar on macOS still needs contrast */
+#titlebar {
+  color: var(--aggle-text) !important;
 }
 
-/* Tab browser tabs container */
-#tabbrowser-tabs {
-  display: flex;
-  align-items: center;
-  flex: 1;
-  min-width: 0;
-  height: 100%;
-  background: transparent !important;
-  padding: 0 4px !important;
-  gap: 2px;
-}
-
-/* Individual tab */
+/* Individual tab — padding/radius/color only, native layout untouched */
 .tabbrowser-tab {
-  display: flex !important;
-  align-items: center;
-  height: 28px !important;
-  min-width: 60px !important;
-  max-width: 200px !important;
-  flex: 0 0 auto;
   background: rgba(255, 255, 255, 0.04) !important;
   border: 1px solid rgba(255, 255, 255, 0.06) !important;
   border-radius: 8px !important;
   margin: 0 1px !important;
   padding: 0 8px !important;
-  transition: background 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease !important;
-  overflow: hidden;
+  color: var(--aggle-muted) !important;
+  transition: background 0.22s var(--ease-smooth), border-color 0.22s var(--ease-smooth), box-shadow 0.22s var(--ease-smooth) !important;
 }
 
 .tabbrowser-tab:hover {
@@ -244,36 +126,26 @@ body.oled-mode :root {
     rgba(255, 90, 31, 0.32) 0%,
     rgba(255, 138, 61, 0.16) 100%
   ) !important;
-  border-color: rgba(255, 138, 61, 0.5) !important;
+  border-color: rgba(255, 255, 255, 0.12) !important;
   box-shadow:
-    0 0 16px rgba(255, 90, 31, 0.2),
+    0 0 16px rgba(255, 255, 255, 0.05),
     inset 0 1px 0 rgba(255, 255, 255, 0.08) !important;
+  transition:
+    background 0.25s var(--ease-smooth),
+    border-color 0.25s var(--ease-smooth),
+    box-shadow 0.3s var(--ease-smooth) !important;
 }
 
-/* Tab label */
-.tab-label-container {
-  flex: 1;
-  min-width: 0;
-  overflow: hidden;
-}
 .tab-text {
   font-size: 12px !important;
   color: var(--aggle-text) !important;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
 }
 .tabbrowser-tab[selected] .tab-text {
   color: #fff !important;
-  text-shadow: 0 0 12px rgba(255, 138, 61, 0.4);
+  text-shadow: 0 0 12px rgba(255, 255, 255, 0.25);
 }
 
-/* Tab favicon */
 .tab-icon-image {
-  width: 14px !important;
-  height: 14px !important;
-  margin-right: 6px;
-  flex-shrink: 0;
   opacity: 0.85;
 }
 .tabbrowser-tab[selected] .tab-icon-image {
@@ -282,21 +154,11 @@ body.oled-mode :root {
 
 /* Tab close button — hidden until hover */
 .tab-close-button {
-  display: flex !important;
-  align-items: center;
-  justify-content: center;
-  width: 18px !important;
-  height: 18px !important;
-  border-radius: 6px !important;
-  margin-left: 4px !important;
   opacity: 0 !important;
-  transition: opacity 0.15s ease !important;
-  flex-shrink: 0;
+  transition: opacity 0.2s var(--ease-smooth) !important;
   background: transparent !important;
   border: none !important;
   color: var(--aggle-muted) !important;
-  font-size: 10px !important;
-  cursor: pointer;
 }
 .tabbrowser-tab:hover .tab-close-button,
 .tabbrowser-tab[selected] .tab-close-button {
@@ -308,28 +170,13 @@ body.oled-mode :root {
   color: #FF6B6B !important;
 }
 
-/* Tab audio indicator */
-.tab-throbber,
-.tab-sharing-icon-overlay {
-  display: none !important;
-}
-
 /* New tab button */
 #tabs-newtab-button {
-  display: flex !important;
-  align-items: center;
-  justify-content: center;
-  width: 28px !important;
-  height: 28px !important;
-  border-radius: 8px !important;
   background: rgba(255, 255, 255, 0.06) !important;
   border: 1px solid rgba(255, 255, 255, 0.08) !important;
+  border-radius: 8px !important;
   color: var(--aggle-muted) !important;
-  font-size: 16px !important;
-  cursor: pointer;
-  transition: all 0.15s ease !important;
-  flex-shrink: 0;
-  margin-left: 2px;
+  transition: all 0.2s var(--ease-smooth) !important;
 }
 #tabs-newtab-button:hover {
   background: rgba(255, 90, 31, 0.15) !important;
@@ -337,20 +184,10 @@ body.oled-mode :root {
   color: var(--aggle-accent-2) !important;
 }
 
-/* Tab overflow buttons */
-.tabbrowser-arrowscrollbox {
-  flex: 1;
-  min-width: 0;
-}
-
 /* --------------------------------------------------------------------------
-   NAV BAR — glass bar with address input, below the tab strip
+   NAV BAR
    -------------------------------------------------------------------------- */
 #nav-bar {
-  display: flex;
-  align-items: center;
-  height: var(--nav-height) !important;
-  padding: 0 10px !important;
   background: linear-gradient(
     180deg,
     rgba(16, 16, 18, 0.90) 0%,
@@ -359,36 +196,16 @@ body.oled-mode :root {
   backdrop-filter: blur(28px) saturate(170%) !important;
   -webkit-backdrop-filter: blur(28px) saturate(170%) !important;
   border-bottom: 1px solid rgba(255, 255, 255, 0.04) !important;
-  gap: 6px;
-  order: 0;
-  position: relative;
-}
-
-/* Subtle grain on nav bar */
-#nav-bar::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  opacity: calc(var(--aggle-grain) * 0.5);
-  background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='150' height='150'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
-  background-size: 80px 80px;
-  mix-blend-mode: overlay;
+  color: var(--aggle-text) !important;
 }
 
 /* Navigation buttons (back, forward, reload) */
 #nav-bar .toolbarbutton-1 {
-  display: flex !important;
-  align-items: center;
-  justify-content: center;
-  width: 32px !important;
-  height: 32px !important;
-  border-radius: 9px !important;
   background: rgba(255, 255, 255, 0.04) !important;
   border: 1px solid rgba(255, 255, 255, 0.06) !important;
+  border-radius: 9px !important;
   color: var(--aggle-muted) !important;
-  transition: all 0.15s ease !important;
-  flex-shrink: 0;
+  transition: all 0.2s var(--ease-smooth) !important;
 }
 #nav-bar .toolbarbutton-1:hover {
   background: rgba(255, 255, 255, 0.10) !important;
@@ -397,98 +214,119 @@ body.oled-mode :root {
 }
 #nav-bar .toolbarbutton-1:active {
   background: rgba(255, 255, 255, 0.06) !important;
-  transform: scale(0.94);
 }
 #nav-bar .toolbarbutton-1[disabled] {
   opacity: 0.3 !important;
-  cursor: default;
 }
 
-/* Nav button icons */
+/* BUTTON ICONS — the invisible-icon fix.
+   Firefox icons are context-property images: they paint with `fill`.
+   Force fill to inherit the button color and pin their box size. */
+.toolbarbutton-icon,
+#nav-bar .toolbarbutton-1 > .toolbarbutton-icon,
+#TabsToolbar .toolbarbutton-1 > .toolbarbutton-icon,
+#PersonalToolbar .toolbarbutton-1 > .toolbarbutton-icon,
+.tab-close-button .button-icon {
+  -moz-context-properties: fill, fill-opacity, stroke, stroke-opacity !important;
+  fill: currentColor !important;
+  color: inherit !important;
+  fill-opacity: 1 !important;
+  opacity: 1 !important;
+}
+
+/* Toolbars keep icon boxes from collapsing */
 #nav-bar .toolbarbutton-1 > .toolbarbutton-icon {
   width: 16px !important;
   height: 16px !important;
-  opacity: 0.8;
 }
-#nav-bar .toolbarbutton-1:hover > .toolbarbutton-icon {
-  opacity: 1;
+
+/* Kill every focus outline in the chrome (the "cyan ring") */
+#nav-bar .toolbarbutton-1:focus,
+#nav-bar .toolbarbutton-1:focus-visible,
+#TabsToolbar .toolbarbutton-1:focus,
+#TabsToolbar .toolbarbutton-1:focus-visible,
+#urlbar:focus,
+#urlbar:focus-within,
+#urlbar-input:focus,
+#searchbar:focus,
+#searchbar:focus-within {
+  outline: none !important;
+  outline-color: transparent !important;
+  box-shadow: none !important;
 }
 
 /* --------------------------------------------------------------------------
-   ADDRESS BAR — glass pill, centered in nav bar
+   ADDRESS BAR — glass pill. Firefox keeps its native height behavior;
+   we only paint it. No height/width/position overrides.
    -------------------------------------------------------------------------- */
-#urlbar-container {
-  flex: 1;
-  max-width: 700px;
-  min-width: 200px;
-  height: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  order: 10;
-  margin: 0 auto;
-}
-
-/* The urlbar wrapper */
 #urlbar {
-  width: 100% !important;
-  height: 100% !important;
+  background: transparent !important;
+  border: none !important;
+  outline: none !important;
+  box-shadow: none !important;
 }
 
-#urlbar-background {
-  display: none !important;
-}
-
+#urlbar-background,
 #urlbar-input-container {
-  height: 34px !important;
   background: rgba(255, 255, 255, 0.055) !important;
   border: 1px solid rgba(255, 255, 255, 0.09) !important;
   border-radius: 10px !important;
-  backdrop-filter: blur(18px) saturate(150%) !important;
-  -webkit-backdrop-filter: blur(18px) saturate(150%) !important;
   box-shadow:
     0 2px 12px rgba(0, 0, 0, 0.25),
     inset 0 1px 0 rgba(255, 255, 255, 0.05) !important;
-  transition: all 0.18s ease !important;
-  padding: 0 4px !important;
-  gap: 0 !important;
+  outline: none !important;
+  transition:
+    background 0.25s var(--ease-smooth),
+    border-color 0.25s var(--ease-smooth),
+    box-shadow 0.28s var(--ease-smooth) !important;
+  will-change: border-color, box-shadow, background;
 }
 
-#urlbar-input-container:hover {
+#urlbar:hover #urlbar-background,
+#urlbar:hover #urlbar-input-container {
   background: rgba(255, 255, 255, 0.08) !important;
   border-color: rgba(255, 255, 255, 0.14) !important;
 }
 
-#urlbar-input-container[focused],
-#urlbar-input-container[focus-within] {
-  background: rgba(30, 26, 22, 0.75) !important;
-  border-color: rgba(255, 138, 61, 0.55) !important;
+/* Focused state — soft ember ring instead of the default focus outline */
+#urlbar[focused] #urlbar-background,
+#urlbar:focus-within #urlbar-background,
+#urlbar[open] #urlbar-background,
+#urlbar[breakout][open] #urlbar-background {
+  background: rgba(255, 255, 255, 0.1) !important;
+  border-color: rgba(255, 255, 255, 0.2) !important;
   box-shadow:
-    0 0 0 3px rgba(255, 90, 31, 0.14),
-    0 4px 20px rgba(0, 0, 0, 0.35),
-    inset 0 1px 0 rgba(255, 255, 255, 0.06) !important;
+    0 0 0 3px rgba(255, 255, 255, 0.1),
+    0 4px 20px rgba(0, 0, 0, 0.5) !important;
+  outline: none !important;
+  transition:
+    background 0.28s var(--ease-smooth),
+    border-color 0.28s var(--ease-smooth),
+    box-shadow 0.32s var(--ease-smooth) !important;
 }
 
-/* URL input text */
 #urlbar-input {
-  font-size: 13px !important;
   color: var(--aggle-text) !important;
-  text-align: center !important;
-  padding: 0 8px !important;
+  outline: none !important;
 }
-#urlbar-input::placeholder {
+#urlbar-input::placeholder,
+#urlbar ::placeholder {
   color: var(--aggle-muted) !important;
   opacity: 0.6;
 }
 
-/* URL bar buttons (left side — engine icon, search icon) */
+/* When the megabar breaks out on focus, keep it inside the nav bar visually */
+#urlbar[breakout][breakout-extend] {
+  background: transparent !important;
+}
+
+/* URL bar icon buttons */
 .urlbar-page-action,
 .urlbar-icon {
-  width: 26px !important;
-  height: 26px !important;
-  border-radius: 7px !important;
   color: var(--aggle-muted) !important;
-  transition: all 0.15s ease !important;
+  fill: currentColor !important;
+  border-radius: 7px !important;
+  transition: all 0.2s var(--ease-smooth) !important;
 }
 .urlbar-page-action:hover,
 .urlbar-icon:hover {
@@ -496,208 +334,172 @@ body.oled-mode :root {
   color: var(--aggle-accent-2) !important;
 }
 
-/* Hide the star/bookmark button (we handle via extension) */
-#star-button {
-  display: none !important;
+
+
+/* RESULTS DROPDOWN (.urlbarView is the real element in modern Firefox) */
+.urlbarView {
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  margin-top: 0 !important;
+  padding: 4px !important;
+  color: var(--aggle-text) !important;
+  outline: none !important;
+  box-sizing: border-box !important;
+
 }
 
-/* URL bar split container */
-#urlbar-splitter {
-  display: none !important;
+/* Hard cap the dropdown so it can never swallow the window */
+.urlbarView-body-inner,
+.urlbarView-results {
+  max-height: 340px !important;
+  overflow-y: auto !important;
+  overflow-x: hidden !important;
 }
 
-/* URL bar results dropdown */
-#urlbar-results {
-  background: var(--aggle-panel) !important;
-  border: 1px solid var(--aggle-line) !important;
-  border-radius: var(--aggle-radius) !important;
-  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.65), inset 0 1px 0 rgba(255, 255, 255, 0.06) !important;
-  backdrop-filter: blur(32px) saturate(180%) !important;
-  -webkit-backdrop-filter: blur(32px) saturate(180%) !important;
-  margin-top: 4px !important;
-  padding: 6px !important;
-  max-height: 400px !important;
+.urlbarView-row {
+  box-sizing: border-box !important;
+
+  border-radius: var(--aggle-radius-sm) !important;
+  padding: 5px 10px !important;
+  margin: 2px 0 !important;
+  color: var(--aggle-text) !important;
+  max-width: 100% !important;
+  min-width: 0 !important;
+  overflow: hidden !important;
+}
+.urlbarView-row-inner {
+  box-sizing: border-box !important;
+
+  max-width: 100% !important;
+  min-width: 0 !important;
+  overflow: hidden !important;
+}
+.urlbarView-row:hover,
+.urlbarView-row[selected],
+.urlbarView-row[row-selected] {
+  background: linear-gradient(135deg, rgba(255, 90, 31, 0.18), rgba(255, 138, 61, 0.10)) !important;
+  color: #fff !important;
+}
+.urlbarView-row .urlbarView-title {
+  color: var(--aggle-text) !important;
+  font-size: 12.5px !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  white-space: nowrap !important;
+  min-width: 0 !important;
+}
+.urlbarView-row .urlbarView-url {
+  color: var(--aggle-muted) !important;
+  font-size: 11px !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  white-space: nowrap !important;
+  min-width: 0 !important;
+}
+
+/* Legacy selector kept for older branches */
+#urlbar-results,
+#PopupAutoCompleteRichResult {
+  max-height: 340px !important;
   overflow-y: auto !important;
 }
 
-#urlbar-results::-webkit-scrollbar {
-  width: 6px;
-}
-#urlbar-results::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.1);
-  border-radius: 3px;
-}
-
-/* URL bar result rows */
-.urlbar-row {
-  border-radius: var(--aggle-radius-sm) !important;
-  padding: 6px 10px !important;
-  margin: 2px 0 !important;
-  transition: background 0.12s ease !important;
-}
-.urlbar-row:hover,
-.urlbar-row[selected] {
-  background: linear-gradient(135deg, rgba(255, 90, 31, 0.18), rgba(255, 138, 61, 0.10)) !important;
-}
-.urlbar-row .urlbar-row-inner-container {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-.urlbar-row .result-icon {
-  width: 16px !important;
-  height: 16px !important;
-  flex-shrink: 0;
-}
-.urlbar-row .result-text {
-  font-size: 12.5px !important;
-  color: var(--aggle-text) !important;
-}
-.urlbar-row .result-url {
-  font-size: 11px !important;
-  color: var(--aggle-muted) !important;
-}
-
-/* Search engine selector in urlbar */
-#urlbar-engine-button {
-  display: none !important;
-}
-
 /* --------------------------------------------------------------------------
-   RIGHT SIDE ACTIONS — sidebar toggle, extension buttons
-   -------------------------------------------------------------------------- */
-#nav-bar-right {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  order: 20;
-  flex-shrink: 0;
-}
-
-#nav-bar-right .toolbarbutton-1 {
-  width: 32px !important;
-  height: 32px !important;
-  border-radius: 9px !important;
-  background: rgba(255, 255, 255, 0.04) !important;
-  border: 1px solid rgba(255, 255, 255, 0.06) !important;
-  color: var(--aggle-muted) !important;
-  transition: all 0.15s ease !important;
-}
-#nav-bar-right .toolbarbutton-1:hover {
-  background: rgba(255, 90, 31, 0.15) !important;
-  border-color: rgba(255, 138, 61, 0.35) !important;
-  color: var(--aggle-accent-2) !important;
-}
-#nav-bar-right .toolbarbutton-1[checked] {
-  background: rgba(255, 90, 31, 0.22) !important;
-  border-color: rgba(255, 138, 61, 0.45) !important;
-  color: var(--aggle-accent-2) !important;
-}
-
-/* Aggle extension toolbar button */
-#aggle-button {
-  display: flex !important;
-  align-items: center;
-  justify-content: center;
-}
-
-/* --------------------------------------------------------------------------
-   BOOKMARKS TOOLBAR — hidden by default for cleaner look
+   BOOKMARKS TOOLBAR — Sleek, ultra-compact Liquid Glass style
    -------------------------------------------------------------------------- */
 #PersonalToolbar {
-  display: none !important;
-}
-
-/* Show bookmarks toolbar when toggled */
-#main-window[show-bookmarks-bar="true"] #PersonalToolbar {
-  display: flex !important;
-  align-items: center;
-  height: 32px !important;
-  padding: 0 10px !important;
-  background: rgba(255, 255, 255, 0.02) !important;
+  min-height: 26px !important;
+  max-height: 28px !important;
+  padding: 1px 8px !important;
+  background: rgba(14, 14, 16, 0.78) !important;
+  backdrop-filter: blur(24px) !important;
+  -webkit-backdrop-filter: blur(24px) !important;
   border-bottom: 1px solid rgba(255, 255, 255, 0.04) !important;
+  border-top: none !important;
+  color: var(--aggle-muted) !important;
 }
 
-#PersonalToolbar .bookmark-item {
-  border-radius: 7px !important;
-  padding: 3px 8px !important;
-  font-size: 12px !important;
+#PersonalToolbar .bookmark-item,
+#PlacesToolbarItems .bookmark-item {
+  border-radius: 6px !important;
+  padding: 2px 7px !important;
+  margin: 1px 2px !important;
+  min-height: 22px !important;
+  font-size: 11.5px !important;
   color: var(--aggle-muted) !important;
-  transition: all 0.12s ease !important;
+  transition: background 150ms ease, color 150ms ease !important;
 }
-#PersonalToolbar .bookmark-item:hover {
-  background: rgba(255, 255, 255, 0.08) !important;
-  color: var(--aggle-text) !important;
+
+#PersonalToolbar .bookmark-item .toolbarbutton-icon {
+  width: 14px !important;
+  height: 14px !important;
+  margin-inline-end: 5px !important;
+  opacity: 0.85 !important;
+}
+
+#PersonalToolbar .bookmark-item:hover,
+#PlacesToolbarItems .bookmark-item:hover {
+  background: rgba(255, 255, 255, 0.07) !important;
+  color: #FFFFFF !important;
+}
+
+#PersonalToolbar .bookmark-item:active,
+#PersonalToolbar .bookmark-item[open] {
+  background: rgba(255, 90, 31, 0.16) !important;
+  color: #FFFFFF !important;
+}
+
+#PersonalToolbar #PlacesChevron {
+  fill: var(--aggle-muted) !important;
+  opacity: 0.75 !important;
 }
 
 /* --------------------------------------------------------------------------
-   NATIVE SIDEBAR — Aggle AI panel
+   NATIVE SIDEBAR — recolor only. Firefox owns the width and position,
+   which is exactly why it will no longer collide with the tab strip.
    -------------------------------------------------------------------------- */
-#sidebar-box {
-  display: flex !important;
-  flex-direction: column;
-  background: linear-gradient(
-    180deg,
-    rgba(14, 14, 16, 0.95) 0%,
-    rgba(8, 8, 10, 0.97) 100%
-  ) !important;
-  backdrop-filter: blur(var(--aggle-blur-heavy)) saturate(170%) !important;
-  -webkit-backdrop-filter: blur(var(--aggle-blur-heavy)) saturate(170%) !important;
-  border-left: 1px solid rgba(255, 255, 255, 0.05) !important;
-  border-radius: var(--aggle-radius) 0 0 var(--aggle-radius) !important;
-  margin: 8px 0 8px 6px !important;
-  box-shadow: -4px 0 24px rgba(0, 0, 0, 0.4) !important;
-  overflow: hidden !important;
+#sidebar-box, #sidebar-main {
+  background: #131316 !important;
+  border-right: 1px solid rgba(255, 255, 255, 0.08) !important;
+  color: #EDEDEF !important;
 }
 
-/* Sidebar header area */
 #sidebar-header {
   background: transparent !important;
   border-bottom: 1px solid rgba(255, 255, 255, 0.04) !important;
-  padding: 8px 12px !important;
+  color: var(--aggle-text) !important;
 }
 
-/* Sidebar content */
 #sidebar-content {
   background: transparent !important;
   border: none !important;
 }
 
-/* Sidebar splitter */
 #sidebar-splitter {
-  width: 4px !important;
   background: transparent !important;
-  cursor: col-resize !important;
+  border: none !important;
 }
 #sidebar-splitter:hover {
-  background: rgba(255, 90, 31, 0.2) !important;
+  background: rgba(255, 255, 255, 0.05) !important;
 }
 
-/* Sidebar close button */
 #sidebar-close {
-  display: flex !important;
-  align-items: center;
-  justify-content: center;
-  width: 26px !important;
-  height: 26px !important;
-  border-radius: 7px !important;
   background: rgba(255, 255, 255, 0.05) !important;
   border: 1px solid rgba(255, 255, 255, 0.08) !important;
+  border-radius: 7px !important;
   color: var(--aggle-muted) !important;
-  cursor: pointer;
-  transition: all 0.15s ease !important;
 }
 #sidebar-close:hover {
   background: rgba(255, 107, 107, 0.15) !important;
-  border-color: rgba(255, 107, 107, 0.35) !important;
   color: #FF6B6B !important;
 }
 
 /* --------------------------------------------------------------------------
-   PANELS / POPUPS — menus, dropdowns, context menus
+   PANELS / MENUS — glass
    -------------------------------------------------------------------------- */
-#popup-containers,
-.panel,
 menupopup,
 panel,
 #contentAreaContextMenu,
@@ -706,15 +508,13 @@ panel,
   background: var(--aggle-panel) !important;
   border: 1px solid var(--aggle-line) !important;
   border-radius: var(--aggle-radius) !important;
-  box-shadow:
-    0 16px 48px rgba(0, 0, 0, 0.65),
-    inset 0 1px 0 rgba(255, 255, 255, 0.06) !important;
+  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.65), inset 0 1px 0 rgba(255, 255, 255, 0.06) !important;
   backdrop-filter: blur(32px) saturate(180%) !important;
   -webkit-backdrop-filter: blur(32px) saturate(180%) !important;
   padding: 6px !important;
+  color: var(--aggle-text) !important;
 }
 
-/* Menu items */
 menupopup menuitem,
 menupopup menu,
 panel menuitem,
@@ -724,7 +524,6 @@ panel menu {
   padding: 5px 12px !important;
   color: var(--aggle-text) !important;
   font-size: 13px !important;
-  transition: background 0.12s ease !important;
 }
 menupopup menuitem:hover,
 menupopup menu:hover,
@@ -756,57 +555,6 @@ tooltip {
 }
 
 /* --------------------------------------------------------------------------
-   SCROLLBARS — slim, glassy
-   -------------------------------------------------------------------------- */
-#navigator-toolbox scrollbox,
-scrollbox {
-  scrollbar-width: thin;
-  scrollbar-color: rgba(255, 255, 255, 0.08) transparent;
-}
-
-scrollbar {
-  width: 8px;
-  height: 8px;
-}
-
-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.10) !important;
-  border-radius: 4px;
-}
-scrollbar-thumb:hover {
-  background: rgba(255, 255, 255, 0.18) !important;
-}
-
-scrollbar-corner {
-  background: transparent !important;
-}
-
-/* --------------------------------------------------------------------------
-   AUTO-HIDE TOOLBAR (scroll-down hides, scroll-up reveals)
-   -------------------------------------------------------------------------- */
-#navigator-toolbox[autohide] {
-  transition: transform 0.25s ease !important;
-}
-#main-window[inFullscreen="true"] #navigator-toolbox,
-#main-window:not([customizing="true"]) #navigator-toolbox[autohide="true"] {
-  transform: translateY(-100%);
-}
-#main-window[inFullscreen="true"] #navigator-toolbox:hover,
-#main-window[inFullscreen="true"] #navigator-toolbox:focus-within,
-#main-window:not([customizing="true"]) #navigator-toolbox[autohide="true"]:hover,
-#main-window:not([customizing="true"]) #navigator-toolbox[autohide="true"]:focus-within {
-  transform: translateY(0);
-}
-
-/* --------------------------------------------------------------------------
-   LOADING / PROGRESS BAR
-   -------------------------------------------------------------------------- */
-#tabbrowser-tabs[positionpinnedtabs] > #tabbrowser-arrowscrollbox > .tabbrowser-tab[selected]::after {
-  /* Progress indicator removed — cleaner look */
-  display: none !important;
-}
-
-/* --------------------------------------------------------------------------
    FIND BAR — glass
    -------------------------------------------------------------------------- */
 #findbar {
@@ -816,83 +564,597 @@ scrollbar-corner {
   box-shadow: 0 12px 36px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.06) !important;
   backdrop-filter: blur(28px) saturate(170%) !important;
   -webkit-backdrop-filter: blur(28px) saturate(170%) !important;
-  padding: 8px 12px !important;
+  color: var(--aggle-text) !important;
+  padding: 6px 12px !important;
 }
 
-#findbar .findbar-textbox {
+.findbar-textbox {
   background: var(--aggle-panel-2) !important;
   border: 1px solid var(--aggle-line) !important;
   border-radius: var(--aggle-radius-sm) !important;
   color: var(--aggle-text) !important;
-  padding: 6px 10px !important;
+  padding: 5px 10px !important;
   font-size: 13px !important;
-}
-#findbar .findbar-textbox:focus {
-  border-color: rgba(255, 138, 61, 0.5) !important;
-  box-shadow: 0 0 0 3px rgba(255, 90, 31, 0.12) !important;
+  outline: none !important;
 }
 
 /* --------------------------------------------------------------------------
-   DOWNLOADS BAR — glass
+   MACOS TRAFFIC LIGHTS
    -------------------------------------------------------------------------- */
-#downloads-indicator {
-  display: none !important;
+.titlebar-button {
+  border-radius: 50% !important;
+  border: none !important;
+  margin: 0 5px !important;
 }
-
-#downloadsPanel {
-  display: none !important;
+.titlebar-button:hover { opacity: 0.8; }
+.titlebar-button:active { opacity: 0.6; }
+.titlebar-button[close-button], .titlebar-close {
+  background: #FF5F57 !important;
+}
+.titlebar-button[min-button], .titlebar-min {
+  background: #FEBC2E !important;
+}
+.titlebar-button[max-button], .titlebar-max {
+  background: #28C840 !important;
 }
 
 /* --------------------------------------------------------------------------
-   ZOOM CONTROLS — subtle
+   SCROLLBARS — slim, glassy
    -------------------------------------------------------------------------- */
-#zoom-controls {
-  display: flex !important;
-  align-items: center;
-  gap: 2px;
+scrollbar {
+  width: 8px;
+  height: 8px;
 }
-#zoom-controls .toolbarbutton-1 {
-  width: 26px !important;
-  height: 26px !important;
-  border-radius: 7px !important;
-  background: rgba(255, 255, 255, 0.04) !important;
-  border: 1px solid rgba(255, 255, 255, 0.06) !important;
-  color: var(--aggle-muted) !important;
-  font-size: 14px !important;
-}
-#zoom-controls .toolbarbutton-1:hover {
+scrollbar-thumb {
   background: rgba(255, 255, 255, 0.10) !important;
-  color: var(--aggle-text) !important;
+  border-radius: 4px;
+  transition: background 0.2s var(--ease-smooth), width 0.2s var(--ease-smooth) !important;
+}
+scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.22) !important;
+  width: 10px !important;
+}
+scrollbar-thumb:active {
+  background: rgba(255, 255, 255, 0.30) !important;
+}
+scrollbar-corner {
+  background: transparent !important;
 }
 
 /* --------------------------------------------------------------------------
-   MACOS TITLEBAR SPACING — compensate for traffic lights
+   COMPACT VIEW — smaller paddings when the window is tight
    -------------------------------------------------------------------------- */
-#titlebar {
-  padding-left: 76px !important; /* Space for traffic lights */
-}
-
-/* --------------------------------------------------------------------------
-   COMPACT VIEW — for smaller windows
-   -------------------------------------------------------------------------- */
-#main-window[aggle-compact-chrome] #TabsToolbar {
-  --tab-height: 30px;
-}
-#main-window[aggle-compact-chrome] #nav-bar {
-  --nav-height: 38px;
-}
 #main-window[aggle-compact-chrome] .tabbrowser-tab {
-  height: 24px !important;
-  min-width: 50px !important;
+  padding: 0 5px !important;
+}
+#main-window[aggle-compact-chrome] #urlbar-input-container {
+  border-radius: 8px !important;
+}
+
+
+
+/* ============================================================================
+   FIX (hardened): hide the "Extension (Aggle)" identity pill on extension pages
+   ============================================================================ */
+#identity-box.extensionPage,
+#identity-box .extensionPage,
+#identity-icon-labels:has(+ .extensionPage) {
+  display: none !important;
+}
+
+/* ============================================================================
+   SMOOTH TAB DRAGGING & REORDERING
+   ============================================================================ */
+/* Add smooth transition to tabs so they slide cleanly when dragging to reorder */
+/* Removed transform transitions because they conflict with native drag physics and cause severe lag */
+.tabbrowser-tab {
+  transition: background-color 100ms ease, opacity 100ms ease, min-width 150ms ease, max-width 150ms ease !important;
+}
+.tabbrowser-tab[dragging="true"], .tabbrowser-tab[moving] {
+  transition: none !important; /* Never transition during drag to keep it instantly snappy */
+}
+
+
+/* ============================================================================
+   MINIMALIST TAB GROUPS (FIXED)
+   ============================================================================ */
+tab-group {
+  /* Remove buggy borders on the generic tag */
+  background: transparent !important;
+  border: none !important;
+}
+
+.tab-group-inner, .tab-group-label-container {
+  background: rgba(255, 255, 255, 0.05) !important;
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+  border-radius: 8px !important;
+  padding: 4px 8px !important;
+  transition: background 150ms ease !important;
+}
+.tab-group-inner:hover, .tab-group-label-container:hover {
+  background: rgba(255, 255, 255, 0.1) !important;
+}
+
+.tab-group-label {
+  color: #EDEDEF !important;
+  font-size: 11px !important;
+  font-weight: 600 !important;
 }
 
 /* --------------------------------------------------------------------------
-   LOADING SCREEN — smooth entry
+   MINIMALIST CONTAINER TABS (Bonus)
+   Makes the Multi-Account Container colored line look like a sleek pill.
    -------------------------------------------------------------------------- */
-@keyframes aggle-chrome-in {
-  from { opacity: 0; transform: translateY(-4px); }
-  to   { opacity: 1; transform: translateY(0); }
+.tab-context-line {
+  height: 2px !important;
+  margin: 2px 8px 0 8px !important;
+  border-radius: 2px !important;
+  opacity: 0.8 !important;
 }
-#navigator-toolbox {
-  animation: aggle-chrome-in 0.2s ease;
+
+
+/* ============================================================================
+   DESIGN OPTION 2: THE COMMAND CENTER
+   Adds the [ ⌘ K ] shortcut hint into the URL bar, and 
+   the [ 💼 Work ] workspace switcher pill into the right toolbar.
+   ============================================================================ */
+
+
+/* ============================================================================
+   SLEEK FLOATING ICONS (Reference Image 2 Style)
+   ============================================================================ */
+
+/* Make all toolbar buttons flat and floating without bulky backgrounds */
+#nav-bar toolbarbutton:not(#urlbar-zoom-button) {
+  background: transparent !important;
+  border: none !important;
+  border-radius: 6px !important;
+  margin: 0 2px !important;
+  transition: background 150ms ease, opacity 150ms ease !important;
+}
+
+#nav-bar toolbarbutton:not(#urlbar-zoom-button):hover {
+  background: rgba(255, 255, 255, 0.08) !important;
+}
+
+
+/* The Workspace Switcher (Floating style like the VPN button in the reference) */
+/* Hide the native icon safely so we don't break hit-testing */
+toolbarbutton[id$="-browser-action"][id*="aggle"] .toolbarbutton-badge-stack {
+  visibility: hidden !important;
+  width: 0 !important;
+  height: 0 !important;
+}
+
+/* Ensure the button has proper dimensions for clicks to register */
+toolbarbutton[id$="-browser-action"][id*="aggle"] {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  min-width: 85px !important;
+  min-height: 28px !important;
+  padding: 0 !important;
+  margin: 0 4px !important;
+  border-radius: 6px !important;
+  background: transparent !important;
+  transition: background 150ms ease !important;
+}
+
+toolbarbutton[id$="-browser-action"][id*="aggle"]:hover {
+  background: rgba(255, 255, 255, 0.08) !important;
+}
+
+/* Inject the text directly */
+toolbarbutton[id$="-browser-action"][id*="aggle"]::after {
+  content: attr(label) " ⌄" !important;
+  display: block !important;
+  color: #EDEDEF !important;
+  font-size: 13px !important;
+  font-weight: 500 !important;
+  pointer-events: none !important; /* Pass clicks to the real button */
+}
+
+/* ============================================================================
+   FOOLPROOF ICON RESTORATION
+   Bypasses native .toolbarbutton-icon entirely by hiding it and injecting
+   the icons as background-images on standard CSS pseudo-elements!
+   ============================================================================ */
+
+/* 1. Maximum specificity to guarantee they exist and cannot be hidden by LibreWolf */
+html#main-window body #navigator-toolbox #nav-bar #back-button,
+html#main-window body #navigator-toolbox #nav-bar #forward-button,
+html#main-window body #navigator-toolbox #nav-bar #reload-button {
+  display: flex !important;
+  visibility: visible !important;
+  align-items: center !important;
+  justify-content: center !important;
+  min-width: 32px !important;
+  min-height: 32px !important;
+  width: 32px !important;
+  height: 32px !important;
+  margin: 0 2px !important;
+  background: transparent !important;
+  border-radius: 6px !important;
+  opacity: 1 !important;
+  transition: background 150ms ease, opacity 150ms ease !important;
+}
+
+html#main-window body #navigator-toolbox #nav-bar #back-button:hover:not([disabled]), 
+html#main-window body #navigator-toolbox #nav-bar #forward-button:hover:not([disabled]), 
+html#main-window body #navigator-toolbox #nav-bar #reload-button:hover:not([disabled]) {
+  background: rgba(255, 255, 255, 0.08) !important;
+}
+
+html#main-window body #navigator-toolbox #nav-bar #back-button[disabled],
+html#main-window body #navigator-toolbox #nav-bar #forward-button[disabled],
+html#main-window body #navigator-toolbox #nav-bar #reload-button[disabled] {
+  opacity: 0.3 !important;
+}
+
+/* 2. Completely destroy the native broken icon */
+#nav-bar #back-button .toolbarbutton-icon,
+#nav-bar #back-button .toolbarbutton-badge-stack,
+#nav-bar #forward-button .toolbarbutton-icon,
+#nav-bar #forward-button .toolbarbutton-badge-stack,
+#nav-bar #reload-button .toolbarbutton-icon,
+#nav-bar #reload-button .toolbarbutton-badge-stack {
+  display: none !important;
+}
+
+/* 3. Inject our own flawless CSS icons! */
+#nav-bar #back-button::after,
+#nav-bar #forward-button::after,
+#nav-bar #reload-button::after {
+  content: "" !important;
+  display: block !important;
+  width: 16px !important;
+  height: 16px !important;
+  background-size: contain !important;
+  background-repeat: no-repeat !important;
+  background-position: center !important;
+  transform: translateY(1.5px) !important;
+}
+
+#nav-bar #back-button::after {
+  background-image: url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxNiIgaGVpZ2h0PSIxNiIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9IiNFREVERUYiIHN0cm9rZS13aWR0aD0iMS41IiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiPjxwYXRoIGQ9Ik0xOSAxMkg1TTEyIDE5bC03LTcgNy03Ii8+PC9zdmc+') !important;
+}
+#nav-bar #forward-button::after {
+  background-image: url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxNiIgaGVpZ2h0PSIxNiIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9IiNFREVERUYiIHN0cm9rZS13aWR0aD0iMS41IiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiPjxwYXRoIGQ9Ik01IDEyaDE0TTEyIDVsNyA3LTcgNyIvPjwvc3ZnPg==') !important;
+}
+#nav-bar #reload-button::after {
+  background-image: url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxNiIgaGVpZ2h0PSIxNiIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9IiNFREVERUYiIHN0cm9rZS13aWR0aD0iMS41IiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiPjxwYXRoIGQ9Ik0yMS41IDJ2NmgtNk0yLjUgMjJ2LTZoNk0yIDExLjVhMTAgMTAgMCAwIDEgMTguOC00LjNNMjIgMTIuNWExMCAxMCAwIDAgMS0xOC44IDQuMiIvPjwvc3ZnPg==') !important;
+}
+
+/* ============================================================================
+   FOOLPROOF BOOKMARK STAR
+   ============================================================================ */
+
+/* 1. Force the star button container to render and look good */
+html#main-window body #navigator-toolbox #nav-bar #star-button-box {
+  display: flex !important;
+  visibility: visible !important;
+  align-items: center !important;
+  justify-content: center !important;
+  width: 28px !important;
+  height: 28px !important;
+  margin: 0 4px !important;
+  border-radius: 6px !important;
+  background: transparent !important;
+  transition: background 150ms ease !important;
+}
+
+html#main-window body #navigator-toolbox #nav-bar #star-button-box:hover {
+  background: rgba(255, 255, 255, 0.08) !important;
+}
+
+/* 2. Hide the native broken icon */
+#star-button .toolbarbutton-icon {
+  display: none !important;
+}
+
+/* 3. Inject our own flawless CSS star icon! */
+#star-button::after {
+  content: "" !important;
+  display: block !important;
+  width: 14px !important;
+  height: 14px !important;
+  background-size: contain !important;
+  background-repeat: no-repeat !important;
+  background-position: center !important;
+  /* Unstarred (Empty Star) */
+  background-image: url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxNiIgaGVpZ2h0PSIxNiIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9IiNFREVERUYiIHN0cm9rZS13aWR0aD0iMS41IiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiPjxwb2x5Z29uIHBvaW50cz0iMTIgMiAxNS4wOSA4LjI2IDIyIDkuMjcgMTcgMTQuMTQgMTguMTggMjEuMDIgMTIgMTcuNzcgNS44MiAyMS4wMiA3IDE0LjE0IDIgOS4yNyA4LjkxIDguMjYgMTIgMiIvPjwvc3ZnPg==') !important;
+}
+
+/* 4. Filled state when bookmarked! */
+#star-button[starred="true"]::after {
+  /* Starred (Aggle Orange Filled Star) */
+  background-image: url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxNiIgaGVpZ2h0PSIxNiIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSIjRkY1QTFGIiBzdHJva2U9IiNGRjVBMUYiIHN0cm9rZS13aWR0aD0iMS41IiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiPjxwb2x5Z29uIHBvaW50cz0iMTIgMiAxNS4wOSA4LjI2IDIyIDkuMjcgMTcgMTQuMTQgMTguMTggMjEuMDIgMTIgMTcuNzcgNS44MiAyMS4wMiA3IDE0LjE0IDIgOS4yNyA4LjkxIDguMjYgMTIgMiIvPjwvc3ZnPg==') !important;
+}
+
+/* ============================================================================
+   AI SIDEBAR BUTTON (Aggle Logo)
+   ============================================================================ */
+
+/* Ensure the sidebar action button looks like a sleek, flat icon */
+toolbarbutton[id$="-sidebar-action"][id*="aggle"] {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  min-width: 32px !important;
+  min-height: 32px !important;
+  padding: 0 !important;
+  margin: 0 2px !important;
+  border-radius: 6px !important;
+  background: transparent !important;
+  transition: background 150ms ease !important;
+}
+
+toolbarbutton[id$="-sidebar-action"][id*="aggle"]:hover {
+  background: rgba(255, 255, 255, 0.08) !important;
+}
+
+/* Ensure the Aggle logo is visible and properly sized */
+toolbarbutton[id$="-sidebar-action"][id*="aggle"] .toolbarbutton-icon {
+  display: block !important;
+  width: 16px !important;
+  height: 16px !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+}
+
+#sidebar-toolbar, #sidebar-header {
+  background: #131316 !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.04) !important;
+  color: #EDEDEF !important;
+}
+
+/* ============================================================================
+   FOOLPROOF NATIVE SIDEBAR TOGGLE BUTTON
+   ============================================================================ */
+html#main-window body #navigator-toolbox #nav-bar #sidebar-button,
+html#main-window body #navigator-toolbox #nav-bar #sidebar-switcher-target,
+html#main-window body #navigator-toolbox #nav-bar #sidebar-revamp-button {
+  display: flex !important;
+  visibility: visible !important;
+  align-items: center !important;
+  justify-content: center !important;
+  min-width: 32px !important;
+  min-height: 32px !important;
+  width: 32px !important;
+  height: 32px !important;
+  margin: 0 2px !important;
+  background: transparent !important;
+  border-radius: 6px !important;
+  opacity: 1 !important;
+  transition: background 150ms ease, opacity 150ms ease !important;
+}
+
+html#main-window body #navigator-toolbox #nav-bar #sidebar-button:hover,
+html#main-window body #navigator-toolbox #nav-bar #sidebar-switcher-target:hover,
+html#main-window body #navigator-toolbox #nav-bar #sidebar-revamp-button:hover {
+  background: rgba(255, 255, 255, 0.08) !important;
+}
+
+/* Hide native icon entirely */
+#nav-bar #sidebar-button {
+  list-style-image: none !important;
+}
+#nav-bar #sidebar-button .toolbarbutton-icon,
+#nav-bar #sidebar-button .toolbarbutton-badge-stack,
+#nav-bar #sidebar-button > image,
+#nav-bar #sidebar-button > stack {
+  display: none !important;
+  visibility: hidden !important;
+  width: 0 !important;
+  height: 0 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+/* Inject sleek custom Sidebar SVG */
+#nav-bar #sidebar-button::after,
+#nav-bar #sidebar-switcher-target::after,
+#nav-bar #sidebar-revamp-button::after {
+  content: "" !important;
+  display: block !important;
+  min-width: 16px !important;
+  min-height: 16px !important;
+  width: 16px !important;
+  height: 16px !important;
+  background-size: contain !important;
+  background-repeat: no-repeat !important;
+  background-position: center !important;
+  transform: translateY(1.5px) !important;
+  background-image: url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxNiIgaGVpZ2h0PSIxNiIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9IiNFREVERUYiIHN0cm9rZS13aWR0aD0iMS41IiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiPjxyZWN0IHg9IjMiIHk9IjMiIHdpZHRoPSIxOCIgaGVpZ2h0PSIxOCIgcng9IjIiIHJ5PSIyIi8+PGxpbmUgeDE9IjkiIHkxPSIzIiB4Mj0iOSIgeTI9IjIxIi8+PC9zdmc+') !important;
+}
+
+/* Ensure ANY new Firefox 131+ vertical sidebar panes match Aggle */
+#sidebar-icon-pane, #sidebar-switcher-target, .sidebar-pane {
+  background: #131316 !important;
+  border-right: 1px solid rgba(255, 255, 255, 0.04) !important;
+}
+
+/* ============================================================================
+   NATIVE SIDEBAR (HISTORY / BOOKMARKS) AGGLE THEME
+   ============================================================================ */
+
+/* 1. Base Sidebar Backgrounds */
+#sidebar-box, 
+#sidebar, 
+.sidebar-panel,
+#sidebar-window,
+page#historyPanel,
+page#bookmarksPanel {
+  background-color: #0A0A0A !important;
+  color: #EDEDEF !important;
+}
+
+/* Ensure the header matches Aggle's panel color */
+#sidebar-header {
+  background: #131316 !important;
+  border-bottom: 1px solid #26262B !important;
+  padding: 10px 14px !important;
+}
+
+/* Style the title */
+#sidebar-header > .sidebar-title {
+  color: #EDEDEF !important;
+  font-weight: 600 !important;
+}
+
+/* Style the close button */
+#sidebar-close {
+  fill: #9B9BA4 !important;
+  opacity: 1 !important;
+}
+#sidebar-close:hover {
+  fill: #FF5A1F !important;
+  background-color: rgba(255, 255, 255, 0.08) !important;
+}
+
+/* 2. Style the Content Area (XUL/HTML Hybrid) */
+@-moz-document url-prefix("chrome://browser/content/places/") {
+  window, page, body, #placesView {
+    background-color: #0A0A0A !important;
+    color: #EDEDEF !important;
+  }
+
+  /* The Search Box container */
+  #search-box {
+    appearance: none !important;
+    background-color: #1B1B20 !important;
+    border: 1px solid #26262B !important;
+    color: #EDEDEF !important;
+    border-radius: 8px !important;
+    padding: 6px 10px !important;
+    margin: 8px !important;
+    transition: all 0.2s ease !important;
+  }
+  
+  /* Focus state for search box (Cyan to Aggle Orange) */
+  #search-box[focused="true"],
+  #search-box:focus-within {
+    border-color: #FF5A1F !important;
+    box-shadow: 0 0 0 2px rgba(255, 90, 31, 0.2) !important;
+    outline: none !important;
+  }
+
+  /* The Tree/List Container */
+  tree {
+    background: transparent !important;
+    color: #EDEDEF !important;
+    border: none !important;
+  }
+
+  /* Tree items */
+  treechildren::-moz-tree-row {
+    background-color: transparent !important;
+    border-radius: 6px !important;
+    min-height: 28px !important;
+  }
+  treechildren::-moz-tree-row(hover) {
+    background-color: rgba(255, 255, 255, 0.05) !important;
+  }
+  treechildren::-moz-tree-row(selected) {
+    background-color: rgba(255, 90, 31, 0.12) !important;
+  }
+  
+  treechildren::-moz-tree-cell-text {
+    color: #EDEDEF !important;
+  }
+  treechildren::-moz-tree-cell-text(selected) {
+    color: #FF8A3D !important;
+  }
+  treechildren::-moz-tree-cell-text(hover) {
+    color: #FFFFFF !important;
+  }
+  
+  /* Day groupings (Today, Yesterday, etc.) - Make them look like cards */
+  treechildren::-moz-tree-row(container) {
+    background-color: #131316 !important;
+    border: 1px solid #26262B !important;
+    border-radius: 8px !important;
+    margin-top: 4px !important;
+  }
+  treechildren::-moz-tree-cell-text(container) {
+    font-weight: 600 !important;
+    color: #EDEDEF !important;
+  }
+}
+
+/* HTML-based modern sidebar components (if Firefox 131+ uses HTML for history) */
+.sidebar-search-container {
+  background-color: #0A0A0A !important;
+  padding: 8px !important;
+}
+
+.sidebar-search-input,
+input[type="search"] {
+  background-color: #1B1B20 !important;
+  border: 1px solid #26262B !important;
+  color: #EDEDEF !important;
+  border-radius: 8px !important;
+}
+
+.sidebar-search-input:focus,
+input[type="search"]:focus {
+  border-color: #FF5A1F !important;
+  box-shadow: 0 0 0 2px rgba(255, 90, 31, 0.2) !important;
+  outline: none !important;
+}
+
+.sidebar-item {
+  color: #EDEDEF !important;
+  border-radius: 6px !important;
+}
+.sidebar-item:hover {
+  background-color: rgba(255, 255, 255, 0.05) !important;
+}
+.sidebar-item[selected],
+.sidebar-item.selected {
+  background-color: rgba(255, 90, 31, 0.12) !important;
+  color: #FF8A3D !important;
+}
+
+/* Group headers / Cards */
+.sidebar-group-header,
+.group-header {
+  background-color: #131316 !important;
+  border: 1px solid #26262B !important;
+  border-radius: 8px !important;
+  color: #EDEDEF !important;
+  font-weight: 600 !important;
+}
+
+/* Hide unified extensions button */
+#unified-extensions-button { display: none !important; visibility: hidden !important; width: 0 !important; }
+
+/* Custom URL Masking via CSS */
+#urlbar-input-container {
+  position: relative !important;
+}
+
+#urlbar-input-container:not(:focus-within):has(#urlbar-input[value*="a64d1f5e-1497-4c8d-8d4e-12501a1db1b6/src/options/options.html"]) #urlbar-input,
+#urlbar-input-container:not(:focus-within):has(#urlbar-input[value*="a64d1f5e-1497-4c8d-8d4e-12501a1db1b6/src/stats/dashboard.html"]) #urlbar-input {
+  color: transparent !important;
+}
+
+#urlbar-input-container:not(:focus-within):has(#urlbar-input[value*="a64d1f5e-1497-4c8d-8d4e-12501a1db1b6/src/options/options.html"])::after {
+  content: "aggle:settings" !important;
+  position: absolute !important;
+  left: 36px !important;
+  top: 50% !important;
+  transform: translateY(-50%) !important;
+  color: var(--aggle-text) !important;
+  pointer-events: none !important;
+}
+
+#urlbar-input-container:not(:focus-within):has(#urlbar-input[value*="a64d1f5e-1497-4c8d-8d4e-12501a1db1b6/src/stats/dashboard.html"])::after {
+  content: "aggle:stats" !important;
+  position: absolute !important;
+  left: 36px !important;
+  top: 50% !important;
+  transform: translateY(-50%) !important;
+  color: var(--aggle-text) !important;
+  pointer-events: none !important;
 }

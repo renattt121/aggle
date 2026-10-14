@@ -2,56 +2,59 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Aggle AI</title>
+  <title>Aggle AI Web Panel</title>
   <link rel="stylesheet" href="panel.css">
 </head>
 <body>
-  <header class="bar">
+  <!-- Header bar -->
+  <header class="panel-header">
     <div class="brand">
       <img src="../../public/icons/aggle-icon.svg" alt="" class="logo">
-      <span>Aggle AI</span>
+      <span class="brand-text">AI Panel</span>
     </div>
-    <div class="bar-actions">
-      <select id="provider-select" title="Provider"></select>
-      <select id="model-select" title="Model"></select>
-      <button id="new-chat" class="icon-btn" title="New chat">＋</button>
-      <a href="../options/options.html" target="_blank" class="icon-btn" title="Settings">⚙</a>
+
+    <div class="header-controls">
+      <select id="service-select" class="service-select" title="Choose AI Service">
+        <option value="gemini">Google Gemini</option>
+        <option value="duckai">DuckDuckGo AI (duck.ai)</option>
+        <option value="chatgpt">ChatGPT</option>
+        <option value="claude">Claude</option>
+        <option value="perplexity">Perplexity</option>
+        <option value="custom">Custom URL…</option>
+      </select>
+
+      <button id="btn-login" class="ctrl-btn" title="Sign in (opens secure tab for account login)">🔑</button>
+      <button id="btn-reload" class="ctrl-btn" title="Reload panel">↻</button>
+      <button id="btn-open-tab" class="ctrl-btn" title="Open in new tab">↗</button>
+      <button id="btn-settings" class="ctrl-btn" title="Edit custom URL">⚙</button>
     </div>
   </header>
 
-  <div class="modes" id="modes">
-    <button class="mode active" data-mode="chat">Chat</button>
-    <button class="mode" data-mode="summarize">Summarize page</button>
-    <button class="mode" data-mode="translate">Translate</button>
+  <!-- Custom URL prompt banner (toggleable) -->
+  <div id="custom-url-banner" class="custom-url-banner" hidden>
+    <input type="url" id="custom-url-input" placeholder="https://example.com/ai" spellcheck="false" autocomplete="off">
+    <button id="custom-url-save" class="banner-btn">Save</button>
+    <button id="custom-url-cancel" class="banner-btn secondary">✕</button>
   </div>
 
-  <main id="messages" class="messages">
-    <div class="empty" id="empty-state">
-      <div class="empty-mark">▲</div>
-      <h2>Ask anything</h2>
-      <p>Aggle can see the page you're viewing. Try:</p>
-      <div class="chips">
-        <button class="chip" data-fill="Explain the key ideas of this page simply.">Explain this page</button>
-        <button class="chip" data-fill="Summarize this page in 3 bullets.">3-bullet summary</button>
-        <button class="chip" data-fill="What are the main arguments against this article's thesis?">Challenge it</button>
-        <button class="chip" data-fill="Extract all facts and figures into a table.">Extract facts</button>
-      </div>
-    </div>
-  </main>
+  <!-- Web Frame Container -->
+  <div class="frame-container">
+    <iframe
+      id="web-frame"
+      src="https://gemini.google.com"
+      allow="clipboard-read; clipboard-write; microphone; camera; geolocation"
+    ></iframe>
+  </div>
 
-  <footer class="composer">
-    <div class="ctx-pill" id="ctx-pill" hidden>
-      <span class="ctx-dot"></span>
-      <span id="ctx-title">Reading page…</span>
-      <button id="ctx-remove" title="Ignore page context">✕</button>
-    </div>
-    <div class="input-row">
-      <textarea id="input" rows="1" placeholder="Ask about this page, or anything…"></textarea>
-      <button id="send" class="send-btn" title="Send">➤</button>
-    </div>
-    <div class="status" id="status"></div>
+  <!-- Bottom Action Bar -->
+  <footer class="panel-footer">
+    <button id="btn-tell-page" class="tell-page-btn" title="Extract current tab content and prepare prompt">
+      <span class="btn-sparkle">✨</span>
+      <span class="btn-text">Tell me about this page</span>
+    </button>
+    <div id="toast" class="toast" hidden>✓ Page context copied! Paste into chat (⌘V)</div>
   </footer>
 
-  <script src="../../dist/panel.js"></script>
+  <script src="../../dist/sidebar/panel.js"></script>
 </body>
 </html>

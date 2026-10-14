@@ -1,0 +1,99 @@
+{
+  "manifest_version": 2,
+  "name": "Aggle",
+  "version": "1.1.0",
+  "description": "Aggle — premium privacy browser layer for Aggle",
+  "applications": {
+    "gecko": {
+      "id": "aggle@aggle.dev",
+      "strict_min_version": "115.0"
+    }
+  },
+  "permissions": [
+    "bookmarks",
+    "nativeMessaging",
+    "tabs",
+    "storage",
+    "webRequest",
+    "webRequestBlocking",
+    "<all_urls>",
+    "browsingData",
+    "privacy",
+    "activeTab",
+    "clipboardWrite"
+  ],
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": ["dist/content.js"],
+      "css": ["dist/palette.css"],
+      "run_at": "document_idle"
+    }
+  ],
+  "web_accessible_resources": [
+    "dist/palette.css",
+    "dist/sidebar/palette.css",
+    "src/sidebar/palette.css",
+    "public/icons/*"
+  ],
+  "background": {
+    "scripts": [
+      "dist/background.js"
+    ],
+    "persistent": true
+  },
+  "browser_action": {
+    "default_icon": "public/icons/aggle-icon.svg",
+    "default_title": "Aggle",
+    "default_popup": "src/popup.html",
+    "default_area": "navbar"
+  },
+  "content_security_policy": "script-src 'self' 'unsafe-eval'; object-src 'self'; frame-src https: http: moz-extension:;",
+  "sidebar_action": {
+    "default_icon": "public/icons/aggle-icon.svg",
+    "default_title": "Aggle AI Web Panel",
+    "default_panel": "src/sidebar/panel.html",
+    "default_width": 380
+  },
+  "options_ui": {
+    "page": "src/options/options.html",
+    "open_in_tab": true
+  },
+  "chrome_url_overrides": {
+    "newtab": "src/newtab/newtab.html"
+  },
+  "icons": {
+    "48": "public/icons/aggle-icon.svg",
+    "96": "public/icons/aggle-icon.svg"
+  },
+  "commands": {
+    "open-stats": {
+      "suggested_key": {
+        "default": "Ctrl+Shift+U",
+        "mac": "Command+Shift+U"
+      },
+      "description": "Open Aggle Stats"
+    },
+    "toggle-ai-sidebar": {
+      "suggested_key": {
+        "default": "Ctrl+J",
+        "mac": "Command+J"
+      },
+      "description": "Toggle AI sidebar"
+    },
+    "toggle-blocker-site": {
+      "suggested_key": {
+        "default": "Ctrl+Shift+B",
+        "mac": "Command+Shift+B"
+      },
+      "description": "Toggle ad-blocker for this site"
+    },
+    "open-palette": {
+      "suggested_key": {
+        "default": "Ctrl+K",
+        "mac": "Command+K"
+      },
+      "description": "Open command palette"
+    }
+  }
+}

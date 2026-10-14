@@ -1,0 +1,38 @@
+================================================================================
+          READY-TO-SEND MESSAGE FOR YOUR FRIEND / WINDOWS USERS
+================================================================================
+
+Copy and paste the text below into Telegram, Discord, WhatsApp, or an Email,
+and attach the file: Aggle-Windows-Port.zip
+
+---------------------------------- COPY BELOW ----------------------------------
+
+Hey! 👋
+
+Here is the complete Windows port of my customized Aggle Browser (the Liquid Glass, dark ember aesthetic browser with an AI sidebar, Command Palette, and compact bookmarks bar).
+
+I packaged everything into this zip file so you can either run it with 1-click or feed it to an AI assistant (like Claude, Cursor, ChatGPT, Copilot, or Antigravity) to build and customize it for you!
+
+📦 WHAT'S IN THE ZIP:
+1. `launcher/run-aggle.bat` — 1-click launcher (sets up your profile and runs the browser).
+2. `launcher/install-aggle.ps1` — Creates "Aggle Browser" shortcuts on your Desktop & Start Menu.
+3. `chrome/userChrome.css` — The custom Liquid Glass dark ember theme adapted for Windows 11 caption buttons.
+4. `extension/` — The Aggle WebExtension featuring the AI Web Panel (DuckDuckGo AI, Google Gemini, Claude, ChatGPT, Perplexity) and Command Palette (Ctrl+K).
+5. `INSTRUCTIONS_FOR_AI.md` — A complete engineering guide specifically crafted for AI coding assistants.
+
+🚀 QUICK START (30 SECONDS):
+1. Extract `Aggle-Windows-Port.zip` to any folder on your PC.
+2. If you don't already have LibreWolf installed, open PowerShell and run:
+   winget install LibreWolf.LibreWolf
+   (Or download it from https://librewolf.net — standard Firefox also works!)
+3. Open the `launcher` folder and double-click `run-aggle.bat`.
+4. Done! Aggle Browser will open with the full dark glass theme, bookmarks bar, and AI panel enabled.
+
+🤖 IF YOU WANT AN AI TO DO IT FOR YOU:
+1. Open the extracted folder in Cursor, VS Code, or your favorite AI tool.
+2. Copy the contents of `INSTRUCTIONS_FOR_AI.md` and paste it into the AI prompt.
+3. The AI will read the exact architecture, configure your profile, and launch it with 100% precision.
+
+Enjoy the browser! Let me know how it looks on your setup! 🔥
+
+---------------------------------- COPY ABOVE ----------------------------------

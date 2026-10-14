@@ -1,23 +1,219 @@
-"use strict";(()=>{var q={theme:{mode:"dark",accentHue:18,accentSaturation:100,blurIntensity:24,grainOpacity:15,backgroundPreset:"ember"},sidebar:{providerId:"ollama",model:"llama3.1",apiKeyGroq:"",apiKeyOpenai:"",apiKeyXai:"",ollamaUrl:"http://localhost:11434",includePageContext:!0},blocker:{enabled:!0,lists:[{id:"aggle-builtin",name:"Aggle Base List",url:"bundled:base",enabled:!0,bundled:!0,ruleCount:0,lastUpdated:0}],whitelist:[],stats:{totalBlocked:0,blockedToday:0,lastResetDate:"",perSite:{}}},performance:{profile:"balanced",processCount:8,diskCacheMb:512,hwVideoDecode:!0,webRender:!0},general:{customNewTab:!0,commandPaletteEnabled:!0,searchEngine:"duckduckgo"}};var b="aggle-settings";function O(e,t){if(t==null)return e;if(typeof e!="object"||Array.isArray(e)||typeof t!="object"||Array.isArray(t))return t;let n={...e};for(let[r,o]of Object.entries(t))n[r]=r in e?O(e[r],o):o;return n}async function N(){let e=await browser.storage.local.get(b);return O(q,e[b])}async function S(e,t){return(await browser.storage.local.get(e))[e]??t}async function K(e,t){await browser.storage.local.set({[e]:t})}function B(e){browser.storage.onChanged.addListener((t,n)=>{n==="local"&&t[b]&&e(t[b].newValue)})}var j=[{id:"ollama",name:"Ollama (local)",baseUrl:"http://localhost:11434",chatPath:"/v1/chat/completions",modelsPath:"/v1/models",authScheme:"none",needsApiKey:!1,models:["llama3.1","llama3.2","qwen2.5","mistral","gemma2"],extraBody:{stream:!0}},{id:"groq",name:"Groq",baseUrl:"https://api.groq.com/openai",chatPath:"/v1/chat/completions",modelsPath:"/v1/models",authScheme:"bearer",needsApiKey:!0,models:["llama-3.1-8b-instant","llama-3.3-70b-versatile","mixtral-8x7b-32768","gemma2-9b-it"]},{id:"openai",name:"OpenAI",baseUrl:"https://api.openai.com",chatPath:"/v1/chat/completions",modelsPath:"/v1/models",authScheme:"bearer",needsApiKey:!0,models:["gpt-4o-mini","gpt-4o","gpt-4.1-mini","o4-mini"]},{id:"xai",name:"xAI",baseUrl:"https://api.x.ai",chatPath:"/v1/chat/completions",modelsPath:"/v1/models",authScheme:"bearer",needsApiKey:!0,models:["grok-3","grok-3-mini","grok-2-1212"]}];async function M(){let t=(await S("aggle-providers",[])).filter(n=>n&&typeof n.id=="string"&&typeof n.baseUrl=="string"&&!j.some(r=>r.id===n.id));return[...j,...t]}async function U(e){return(await M()).find(n=>n.id===e)}function A(e,t){switch(e.id){case"groq":return t.apiKeyGroq;case"openai":return t.apiKeyOpenai;case"xai":return t.apiKeyXai;default:return""}}function ee(e,t,n){let r={"Content-Type":"application/json",...e.extraHeaders??{}};e.authScheme==="bearer"&&t&&(r.Authorization=`Bearer ${t}`);let o={model:"",messages:n,stream:!0,...e.extraBody??{}};return{url:`${e.baseUrl.replace(/\/$/,"")}${e.chatPath}`,init:{method:"POST",headers:r,body:JSON.stringify(o)}}}async function G(e,t,n,r,o){let{url:i,init:l}=ee(e,t,r),a=JSON.parse(l.body);a.model=n,l.body=JSON.stringify(a);let c;try{c=await fetch(i,l)}catch(m){o.onError(e.id==="ollama"?`Can't reach Ollama at ${e.baseUrl}. Is it running? (ollama serve)`:`Network error reaching ${e.name}: ${m.message}`);return}if(!c.ok||!c.body){let m=`${c.status} ${c.statusText}`;try{m=(await c.json())?.error?.message??m}catch{}o.onError(`${e.name}: ${m}`);return}let w=c.body.getReader(),x=new TextDecoder,p="",f=!1;try{for(;;){let{done:m,value:H}=await w.read();if(m)break;p+=x.decode(H,{stream:!0});let D=p.split(`
-`);p=D.pop()??"";for(let Z of D){let R=Z.trim();if(!R.startsWith("data:"))continue;let F=R.slice(5).trim();if(F!=="[DONE]")try{let I=JSON.parse(F)?.choices?.[0]?.delta?.content??"";I&&(f=!0,o.onToken(I))}catch{}}}f?o.onDone():o.onError("The model returned an empty response.")}catch(m){f?o.onDone():o.onError(`Stream failed: ${m.message}`)}}async function _(e,t){if(!e.modelsPath)return e.models;let n={};e.authScheme==="bearer"&&t&&(n.Authorization=`Bearer ${t}`);try{let r=await fetch(`${e.baseUrl.replace(/\/$/,"")}${e.modelsPath}`,{headers:n});if(!r.ok)return e.models;let i=((await r.json())?.data??[]).map(l=>l.id).filter(Boolean);return i.length?i:e.models}catch{return e.models}}var te="You are Aggle, a concise assistant built into the user's browser. Answer in clean Markdown. Be brief unless asked for depth.",ne=e=>`The user is currently viewing this page:
-Title: ${e.title}
-URL: ${e.url}
+"use strict";
+(() => {
+  const SERVICES = {
+    gemini: {
+      name: "Google Gemini",
+      url: "https://gemini.google.com",
+      loginUrl: "https://accounts.google.com/ServiceLogin?service=bard&continue=https%3A%2F%2Fgemini.google.com%2F"
+    },
+    duckai: {
+      name: "DuckDuckGo AI (duck.ai)",
+      url: "https://duck.ai",
+      loginUrl: "https://duck.ai"
+    },
+    chatgpt: {
+      name: "ChatGPT",
+      url: "https://chatgpt.com",
+      loginUrl: "https://chatgpt.com/auth/login"
+    },
+    claude: {
+      name: "Claude",
+      url: "https://claude.ai",
+      loginUrl: "https://claude.ai/login"
+    },
+    perplexity: {
+      name: "Perplexity",
+      url: "https://www.perplexity.ai",
+      loginUrl: "https://www.perplexity.ai"
+    }
+  };
 
-Content (may be truncated):
-"""
-${e.text}
-"""`;function z(e,t,n,r){let o=[],i=te;r&&(i+=`
+  const DEFAULT_SERVICE = "gemini";
+  const DEFAULT_CUSTOM_URL = "https://gemini.google.com";
 
-${ne(r)}`),o.push({role:"system",content:i});let l=e.slice(-12);for(let c of l)c.role!=="system"&&o.push({role:c.role,content:c.content});let a=t;return n==="summarize"?a="Summarize the page I'm viewing. Structure it as: a one-paragraph TL;DR, then key points as a bullet list, then any notable caveats.":n==="translate"&&(a=`Translate the main content of the page I'm viewing into ${t||"English"}. Preserve the structure. Reply only with the translation.`),o.push({role:"user",content:a}),o}function k(){return{id:`conv-${Date.now()}-${Math.random().toString(36).slice(2,8)}`,title:"New chat",createdAt:Date.now(),messages:[]}}function V(e){let t=e.replace(/\s+/g," ").trim();return t.length>42?`${t.slice(0,42)}\u2026`:t||"New chat"}function oe(e){return e.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;")}function y(e){return e.replace(/`([^`]+)`/g,"<code>$1</code>").replace(/\*\*([^*]+)\*\*/g,"<strong>$1</strong>").replace(/(^|[^*])\*([^*\n]+)\*/g,"$1<em>$2</em>").replace(/\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)/g,'<a href="$2" target="_blank" rel="noreferrer noopener">$1</a>')}function v(e){let t=oe(e).split(`
-`),n=[],r=!1,o=[],i=null,l=()=>{i&&(n.push(`</${i}>`),i=null)};for(let a of t){if(a.trim().startsWith("```")){r?(n.push(`<pre><code>${o.join(`
-`)}</code></pre>`),o=[],r=!1):(l(),r=!0);continue}if(r){o.push(a);continue}let c=/^(#{1,4})\s+(.*)$/.exec(a);if(c){l();let f=c[1].length+1;n.push(`<h${f}>${y(c[2])}</h${f}>`);continue}let w=/^[-*]\s+(.*)$/.exec(a);if(w){i!=="ul"&&(l(),n.push("<ul>"),i="ul"),n.push(`<li>${y(w[1])}</li>`);continue}let x=/^\d+[.)]\s+(.*)$/.exec(a);if(x){i!=="ol"&&(l(),n.push("<ol>"),i="ol"),n.push(`<li>${y(x[1])}</li>`);continue}let p=/^&gt;\s?(.*)$/.exec(a);if(p){l(),n.push(`<blockquote>${y(p[1])}</blockquote>`);continue}if(a.trim()===""){l();continue}l(),n.push(`<p>${y(a)}</p>`)}return r&&o.length&&n.push(`<pre><code>${o.join(`
-`)}</code></pre>`),l(),n.join("")}var s=e=>document.querySelector(e),d,E=[],u=k(),g="chat",h=null,P=!1,C=!1;function T(e,t){let n=document.createElement("div");return n.className=`msg ${e}`,e==="assistant"?n.innerHTML=v(t):n.textContent=t,s("#empty-state")?.remove(),s("#messages").appendChild(n),s("#messages").scrollTop=s("#messages").scrollHeight,n}async function W(){if(!d.sidebar.includePageContext||P)return;let t=(await browser.tabs.query({active:!0,currentWindow:!0}))[0];if(!(!t?.id||!t.url?.startsWith("http")))try{await browser.tabs.executeScript(t.id,{file:"/dist/content.js"});let n=await browser.tabs.sendMessage(t.id,{action:"content:extractPage"});n?.text&&(h=n,s("#ctx-pill").hidden=!1,s("#ctx-title").textContent=n.title||n.url)}catch{}}async function se(){E=await M();let e=s("#provider-select");e.innerHTML="";for(let t of E){let n=document.createElement("option");n.value=t.id,n.textContent=t.name,e.appendChild(n)}e.value=d.sidebar.providerId,e.selectedIndex===-1&&E.length&&(e.value=E[0].id),await X()}async function X(){let e=E.find(r=>r.id===s("#provider-select").value);if(!e)return;let t=s("#model-select");t.innerHTML="";let n=await _(e,A(e,d.sidebar));for(let r of n.slice(0,60)){let o=document.createElement("option");o.value=r,o.textContent=r,t.appendChild(o)}t.value=d.sidebar.model,t.selectedIndex===-1&&n.length&&(t.value=n[0],d.sidebar.model=n[0])}async function J(){if(C)return;let e=s("#input"),t=e.value.trim();if(g==="chat"&&!t)return;if(g==="summarize"&&!h){T("error","No readable page in this window \u2014 open an article first, then hit Summarize.");return}let n=await U(s("#provider-select").value);if(!n)return;if(n.needsApiKey&&!A(n,d.sidebar)){T("error",`No API key set for ${n.name}. Open Settings \u2192 AI Sidebar to add one.`);return}let r=s("#model-select").value||d.sidebar.model;g==="chat"&&(T("user",t),u.messages.push({role:"user",content:t,timestamp:Date.now()})),e.value="",$();let o=T("assistant","");o.innerHTML='<span class="cursor"></span>';let i="";C=!0,s("#send").disabled=!0,s("#status").textContent=n.id==="ollama"?"Asking your local model\u2026":"Thinking\u2026",await G(n,A(n,d.sidebar),r,z(u.messages,t,g,h),{onToken:l=>{i+=l,o.innerHTML=v(i)+'<span class="cursor"></span>';let a=s("#messages");a.scrollHeight-a.scrollTop-a.clientHeight<160&&(a.scrollTop=a.scrollHeight)},onDone:()=>{o.innerHTML=v(i),Y(i)},onError:l=>{i?o.innerHTML=v(i):o.remove(),T("error",l),Y(i)}})}function Y(e){e&&(u.messages.push({role:"assistant",content:e,timestamp:Date.now()}),u.messages.filter(t=>t.role==="user").length===1&&(u.title=V(u.messages[0].content))),C=!1,s("#send").disabled=!1,s("#status").textContent="",re()}async function re(){let e=await S("aggle-conversations",[]),t=e.findIndex(n=>n.id===u.id);t>=0?e[t]=u:e.unshift(u),await K("aggle-conversations",e.slice(0,30))}function $(){let e=s("#input");e.style.height="auto",e.style.height=`${Math.min(e.scrollHeight,130)}px`}function L(e){g=e,document.querySelectorAll(".mode").forEach(n=>n.classList.toggle("active",n.dataset.mode===g));let t=s("#input");g==="summarize"?t.placeholder="Click \u27A4 to summarize the page you're viewing\u2026":g==="translate"?t.placeholder="Translate the page into\u2026 (English, \u0423\u043A\u0440\u0430\u0457\u043D\u0441\u044C\u043A\u0430, Deutsch\u2026)":t.placeholder="Ask about this page, or anything\u2026"}function Q(e){e.querySelectorAll(".chip").forEach(t=>t.addEventListener("click",()=>{s("#input").value=t.dataset.fill??"",$(),s("#input").focus()}))}function ie(){s("#provider-select").addEventListener("change",async t=>{d.sidebar.providerId=t.target.value,await X()}),s("#model-select").addEventListener("change",t=>{d.sidebar.model=t.target.value}),document.querySelectorAll(".mode").forEach(t=>t.addEventListener("click",()=>L(t.dataset.mode))),Q(document);let e=s("#input");e.addEventListener("input",$),e.addEventListener("keydown",t=>{t.key==="Enter"&&!t.shiftKey&&(t.preventDefault(),J())}),s("#send").addEventListener("click",()=>void J()),s("#new-chat").addEventListener("click",()=>{u=k(),P=!1,h=null,s("#ctx-pill").hidden=!0;let t=s("#messages");t.innerHTML="",t.appendChild(ae()),L("chat")}),s("#ctx-remove").addEventListener("click",()=>{P=!0,h=null,s("#ctx-pill").hidden=!0}),B(t=>{d=t})}function ae(){let e=document.createElement("div");return e.className="empty",e.id="empty-state",e.innerHTML=`
-    <div class="empty-mark">\u25B2</div>
-    <h2>Ask anything</h2>
-    <p>Aggle can see the page you're viewing. Try:</p>
-    <div class="chips">
-      <button class="chip" data-fill="Explain the key ideas of this page simply.">Explain this page</button>
-      <button class="chip" data-fill="Summarize this page in 3 bullets.">3-bullet summary</button>
-      <button class="chip" data-fill="What are the main arguments against this article's thesis?">Challenge it</button>
-      <button class="chip" data-fill="Extract all facts and figures into a table.">Extract facts</button>
-    </div>`,Q(e),e}(async()=>(d=await N(),ie(),L("chat"),await se(),await W(),browser.tabs.onActivated.addListener(()=>{P=!1,h=null,s("#ctx-pill").hidden=!0,W()})))();})();
+  // Elements
+  const serviceSelect = document.getElementById("service-select");
+  const webFrame = document.getElementById("web-frame");
+  const btnLogin = document.getElementById("btn-login");
+  const btnReload = document.getElementById("btn-reload");
+  const btnOpenTab = document.getElementById("btn-open-tab");
+  const btnSettings = document.getElementById("btn-settings");
+  const btnTellPage = document.getElementById("btn-tell-page");
+  const toast = document.getElementById("toast");
+
+  const customBanner = document.getElementById("custom-url-banner");
+  const customUrlInput = document.getElementById("custom-url-input");
+  const customUrlSave = document.getElementById("custom-url-save");
+  const customUrlCancel = document.getElementById("custom-url-cancel");
+
+  let currentService = localStorage.getItem("aggle-panel-service") || DEFAULT_SERVICE;
+  let customUrl = localStorage.getItem("aggle-panel-custom-url") || DEFAULT_CUSTOM_URL;
+  let toastTimer = null;
+
+  function getCurrentUrl() {
+    if (currentService === "custom") {
+      return customUrl || DEFAULT_CUSTOM_URL;
+    }
+    return SERVICES[currentService]?.url || SERVICES.gemini.url;
+  }
+
+  function loadService(serviceKey) {
+    currentService = serviceKey;
+    localStorage.setItem("aggle-panel-service", currentService);
+    serviceSelect.value = currentService;
+
+    if (currentService === "custom") {
+      customUrlInput.value = customUrl;
+      customBanner.hidden = false;
+      webFrame.src = customUrl;
+    } else {
+      customBanner.hidden = true;
+      const targetUrl = SERVICES[currentService]?.url || SERVICES.gemini.url;
+      if (webFrame.src !== targetUrl) {
+        webFrame.src = targetUrl;
+      }
+    }
+  }
+
+  function showToast(message) {
+    if (toastTimer) clearTimeout(toastTimer);
+    toast.textContent = message;
+    toast.hidden = false;
+    toastTimer = setTimeout(() => {
+      toast.hidden = true;
+      toastTimer = null;
+    }, 3200);
+  }
+
+  async function copyToClipboard(text) {
+    try {
+      await navigator.clipboard.writeText(text);
+      return true;
+    } catch {
+      try {
+        const ta = document.createElement("textarea");
+        ta.value = text;
+        ta.style.position = "fixed";
+        ta.style.opacity = "0";
+        document.body.appendChild(ta);
+        ta.select();
+        document.execCommand("copy");
+        document.body.removeChild(ta);
+        return true;
+      } catch (err) {
+        console.error("Clipboard copy failed:", err);
+        return false;
+      }
+    }
+  }
+
+  async function handleTellMeAboutPage() {
+    try {
+      const [activeTab] = await browser.tabs.query({ active: true, currentWindow: true });
+      if (!activeTab) {
+        showToast("⚠️ No active tab found");
+        return;
+      }
+
+      let pageData = null;
+      if (activeTab.id !== undefined) {
+        try {
+          pageData = await browser.tabs.sendMessage(activeTab.id, { action: "content:extractPage" });
+        } catch {
+          // If content script was not ready or on a restricted page
+        }
+      }
+
+      const title = pageData?.title || activeTab.title || "Current Page";
+      const url = pageData?.url || activeTab.url || "";
+      const text = pageData?.text || "";
+
+      let prompt = `Please summarize and explain what this page is about:\n\nTitle: ${title}\nURL: ${url}`;
+      if (text) {
+        const cleanText = text.length > 4500 ? `${text.slice(0, 4500)}\n\n[... content truncated]` : text;
+        prompt += `\n\nPage Content:\n${cleanText}`;
+      }
+
+      const success = await copyToClipboard(prompt);
+      if (success) {
+        showToast("✓ Page context copied! Paste into chat (⌘V)");
+      } else {
+        showToast("⚠️ Could not copy to clipboard");
+      }
+    } catch (err) {
+      console.error("Error extracting page context:", err);
+      showToast("⚠️ Error reading page context");
+    }
+  }
+
+  // Event Listeners
+  serviceSelect.addEventListener("change", (e) => {
+    loadService(e.target.value);
+  });
+
+  if (btnLogin) {
+    btnLogin.addEventListener("click", () => {
+      const service = SERVICES[currentService];
+      const loginUrl = service?.loginUrl || getCurrentUrl();
+      browser.tabs.create({ url: loginUrl, active: true });
+      showToast("Opened sign-in tab. Return here once signed in!");
+    });
+  }
+
+  btnReload.addEventListener("click", () => {
+    const target = getCurrentUrl();
+    webFrame.src = "about:blank";
+    setTimeout(() => { webFrame.src = target; }, 50);
+  });
+
+  btnOpenTab.addEventListener("click", () => {
+    const url = getCurrentUrl();
+    browser.tabs.create({ url, active: true });
+  });
+
+  btnSettings.addEventListener("click", () => {
+    customBanner.hidden = !customBanner.hidden;
+    if (!customBanner.hidden) {
+      customUrlInput.value = customUrl;
+      customUrlInput.focus();
+    }
+  });
+
+  customUrlSave.addEventListener("click", () => {
+    let entered = customUrlInput.value.trim();
+    if (!entered) return;
+    if (!/^https?:\/\//i.test(entered)) {
+      entered = `https://${entered}`;
+    }
+    customUrl = entered;
+    localStorage.setItem("aggle-panel-custom-url", customUrl);
+    customBanner.hidden = true;
+    currentService = "custom";
+    loadService("custom");
+  });
+
+  customUrlCancel.addEventListener("click", () => {
+    customBanner.hidden = true;
+  });
+
+  btnTellPage.addEventListener("click", handleTellMeAboutPage);
+
+  // Auto-refresh when returning to window after logging in
+  window.addEventListener("focus", () => {
+    try {
+      if (webFrame.src.includes("accounts.google.com") || webFrame.src.includes("auth")) {
+        webFrame.src = getCurrentUrl();
+      }
+    } catch {}
+  });
+
+  browser.runtime?.onMessage?.addListener((msg) => {
+    if (msg?.action === "panel:reloadService") {
+      webFrame.src = getCurrentUrl();
+      showToast("✓ Synced with active session!");
+    }
+  });
+
+  // Initialize
+  loadService(currentService);
+})();

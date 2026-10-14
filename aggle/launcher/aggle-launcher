@@ -5,12 +5,16 @@ Sets up the Aggle profile, installs the extension, and launches Aggle.
 """
 
 import os
+import re
 import sys
 import json
 import shutil
 import subprocess
+import time
+import uuid
 import zipfile
 from pathlib import Path
+from typing import Tuple, Optional
 
 # ─── Paths ───────────────────────────────────────────────────────────────────
 
@@ -27,8 +31,9 @@ RESOURCES = APP_ROOT / "Resources"
 CHROME_SRC = RESOURCES / "chrome"
 EXTENSION_XPI = RESOURCES / "aggle-extension.xpi"
 
-# Aggle application
-LIBREWOLF_APP = Path("/Applications/Aggle.app")
+# LibreWolf application (Aggle is a profile/theme on top of it)
+LIBREWOLF_APP = Path("/Applications/LibreWolf.app")
+AGGLE_APP = LIBREWOLF_APP  # fallback alias for backward compat
 
 
 # ─── Setup ───────────────────────────────────────────────────────────────────
@@ -50,9 +55,25 @@ def setup_profile() -> None:
         src = CHROME_SRC / css_file
         dst = CHROME_DIR / css_file
         if src.exists():
-            shutil.copy2(src, dst)
-            log(f"Copied {css_file}")
-
+            needs_update = True
+            if dst.exists():
+                with open(src, "rb") as sf, open(dst, "rb") as df:
+                    if sf.read() == df.read():
+                        needs_update = False
+            
+            if needs_update:
+                shutil.copy(src, dst)  # use copy instead of copy2 to update mtime
+                log(f"Updated {css_file}")
+                
+                # Clear startupCache so Firefox picks up the new CSS immediately
+                # Firefox stores this in the local cache dir, which on macOS is in ~/Library/Caches
+                for cache_base in (HOME / "Library" / "Caches" / "LibreWolf", HOME / "Library" / "Caches" / "Aggle"):
+                    if cache_base.exists():
+                        for profile_dir in cache_base.glob("Profiles/*"):
+                            sc = profile_dir / "startupCache"
+                            if sc.exists():
+                                shutil.rmtree(sc, ignore_errors=True)
+                                log(f"Cleared startupCache in {profile_dir.name}")
     # Write user.js preferences
     userjs = PROFILE_DIR / "user.js"
     userjs.write_text(_generate_userjs())
@@ -66,34 +87,147 @@ def setup_profile() -> None:
 
 
 def install_extension(xpi_path: Path) -> None:
-    """Extract XPI and copy to extensions folder."""
-    ext_id = "aggle@aggle.dev"
-    ext_dir = EXTENSIONS_DIR / ext_id
+    """Install the Aggle extension into the profile.
 
-    # Remove old install if present
-    if ext_dir.exists():
-        shutil.rmtree(ext_dir)
+    Modern Firefox no longer side-loads XPIs dropped into the extensions
+    folder, and policy install URLs must be https — so we place the packed
+    XPI and register it directly in the profile's extension database.
+    """
+    dest = EXTENSIONS_DIR / "aggle@aggle.dev.xpi"
+    shutil.copy2(xpi_path, dest)
 
-    # Extract XPI
-    with zipfile.ZipFile(xpi_path, "r") as zf:
-        zf.extractall(TEMP_DIR)
+    # Clean up any unpacked folder from the old (broken) approach
+    old_dir = EXTENSIONS_DIR / "aggle@aggle.dev"
+    if old_dir.exists():
+        shutil.rmtree(old_dir)
 
-    # Copy everything except node_modules
-    for item in TEMP_DIR.iterdir():
-        dest = ext_dir / item.name
-        if item.is_dir():
-            shutil.copytree(item, dest, dirs_exist_ok=True)
-        else:
-            shutil.copy2(item, dest)
+    _register_extension_db(dest)
+    log("Installed extension: aggle@aggle.dev (registered in extension DB)")
 
-    # Clean up temp
-    shutil.rmtree(TEMP_DIR, ignore_errors=True)
-    log(f"Installed extension: {ext_id}")
+
+def _register_extension_db(xpi_path: Path) -> None:
+    """Add the Aggle addon entry to <profile>/extensions.json.
+
+    The schema mirrors what this engine writes for a working install
+    (verified against a policy-installed addon on the same version).
+    """
+    now = int(time.time() * 1000)
+    version = "1.1.0"
+    try:
+        with zipfile.ZipFile(xpi_path, "r") as zf:
+            if "manifest.json" in zf.namelist():
+                mf = json.loads(zf.read("manifest.json").decode("utf-8"))
+                version = mf.get("version", version)
+    except Exception:
+        pass
+    entry = {
+        "id": "aggle@aggle.dev",
+        "syncGUID": "{%s}" % uuid.uuid4(),
+        "version": version,
+        "type": "extension",
+        "loader": None,
+        "updateURL": None,
+        "installOrigins": None,
+        "manifestVersion": 2,
+        "optionsURL": "src/options/options.html",
+        "optionsType": 3,
+        "optionsBrowserStyle": False,
+        "aboutURL": None,
+        "defaultLocale": {
+            "name": "Aggle",
+            "description": "Aggle — premium privacy browser layer",
+            "creator": None, "developers": None,
+            "translators": None, "contributors": None,
+        },
+        "visible": True,
+        "active": True,
+        "userDisabled": False,
+        "appDisabled": False,
+        "embedderDisabled": False,
+        "installDate": now,
+        "updateDate": now,
+        "applyBackgroundUpdates": 1,
+        "path": str(xpi_path),
+        "skinnable": False,
+        "sourceURI": None,
+        "releaseNotesURI": None,
+        "softDisabled": False,
+        "foreignInstall": False,
+        "strictCompatibility": True,
+        "locales": [],
+        "targetApplications": [
+            {"id": "toolkit@mozilla.org", "minVersion": "115.0", "maxVersion": None}
+        ],
+        "targetPlatforms": [],
+        "signedState": 0,
+        "signedTypes": None,
+        "signedDate": 0,
+        "seen": True,
+        "dependencies": [],
+        "incognito": "spanning",
+        "userPermissions": {
+            "permissions": ["tabs", "storage", "webRequest", "webRequestBlocking",
+                            "browsingData", "privacy", "activeTab", "clipboardWrite"],
+            "origins": ["<all_urls>"],
+            "data_collection": ["none"],
+        },
+        "optionalPermissions": {"permissions": [], "origins": [], "data_collection": []},
+        "requestedPermissions": {"permissions": [], "origins": [], "data_collection": []},
+        "icons": {"48": "public/icons/aggle-icon.svg", "96": "public/icons/aggle-icon.svg"},
+        "iconURL": None,
+        "blocklistAttentionDismissed": False,
+        "blocklistState": 0,
+        "blocklistURL": None,
+        "startupData": None,
+        "hidden": False,
+        "installTelemetryInfo": None,
+        "recommendationState": None,
+        "rootURI": "jar:file://%s!/" % xpi_path,
+        "location": "app-profile",
+    }
+
+    db_path = PROFILE_DIR / "extensions.json"
+    db = {"addons": [], "schemaVersion": 31}
+    if db_path.exists():
+        try:
+            db = json.loads(db_path.read_text())
+        except (ValueError, OSError):
+            pass
+    db.setdefault("addons", [])
+    db["addons"] = [a for a in db["addons"] if a.get("id") != "aggle@aggle.dev"]
+    db["addons"].append(entry)
+    db_path.write_text(json.dumps(db, indent=1))
+
+
+def _extension_newtab_url() -> Optional[str]:
+    """Resolve the Aggle extension's newtab URL from the profile's prefs.js.
+
+    The engine maps each extension to a moz-extension://<uuid> origin and
+    stores the mapping in the "extensions.webextensions.uuids" pref. On this
+    engine build, raw about:newtab loads are served the built-in Activity
+    Stream even when an extension overrides the newtab (the override only
+    affects the toolbar new-tab action), so the startup homepage must point
+    at the extension page directly. Returns None until the engine has run
+    once and assigned the UUID.
+    """
+    prefs = PROFILE_DIR / "prefs.js"
+    if not prefs.exists():
+        return None
+    try:
+        m = re.search(
+            r'aggle@aggle\.dev\\?"\s*:\s*\\?"([0-9a-f-]{36})', prefs.read_text()
+        )
+    except OSError:
+        return None
+    if not m:
+        return None
+    return f"moz-extension://{m.group(1)}/src/newtab/newtab.html"
 
 
 def _generate_userjs() -> str:
     """Generate user.js with Aggle + Aggle preferences."""
-    return """\
+    homepage = _extension_newtab_url() or "about:newtab"
+    return f"""\
 // Aggle Browser — User Preferences
 // Generated by aggle-launcher
 
@@ -103,6 +237,10 @@ user_pref("toolkit.legacyUserProfileCustomizations.stylesheets", true);
 // Privacy — Aggle defaults
 user_pref("privacy.trackingprotection.enabled", true);
 user_pref("privacy.trackingprotection.pbmode.enabled", true);
+// Hide DNS traffic from ISP
+user_pref("network.trr.mode", 2);
+user_pref("network.trr.uri", "https://mozilla.cloudflare-dns.com/dns-query");
+
 user_pref("privacy.resistFingerprinting", false);
 user_pref("privacy.sanitize.sanitizeOnShutdown", false);
 
@@ -113,12 +251,38 @@ user_pref("browser.cache.disk.enable", true);
 user_pref("media.hardware-video-decoding.enabled", true);
 user_pref("gfx.webrender.all", true);
 
+// Quit Warning
+user_pref("browser.showQuitWarning", true);
+user_pref("browser.warnOnQuit", true);
+
 // UI — Aggle chrome
-user_pref("browser.tabs.drawInTitlebar", false);
+user_pref("toolkit.cosmeticAnimations.enabled", true);
+user_pref("browser.tabs.animate", true);
+user_pref("browser.tabs.groups.enabled", true);
+user_pref("browser.tabs.insertAfterCurrent", true);
+user_pref("browser.tabs.insertRelatedAfterCurrent", true);
+
+
+user_pref("ui.prefersReducedMotion", 0);
+
 user_pref("browser.tabs.height", 36);
 user_pref("browser.chrome.site_icons", true);
 user_pref("browser.newtabpage.enabled", true);
-user_pref("browser.startup.homepage", "about:blank");
+// This engine build serves raw about:newtab loads with the built-in
+// Activity Stream even when an extension overrides the newtab, so point
+// the homepage straight at the Aggle extension page once its UUID is known.
+user_pref("browser.startup.homepage", "{homepage}");
+user_pref("browser.startup.page", 1);
+// Enable bookmarks toolbar ("always" visible, styled compactly)
+user_pref("browser.toolbars.bookmarks.visibility", "always");
+
+// Extensions — allow the locally-installed Aggle extension
+user_pref("extensions.autoDisableScopes", 0);
+user_pref("extensions.enabledScopes", 15);
+user_pref("xpinstall.signatures.required", false);
+
+// Theme — dark chrome so default icon/ink colors are light (Aggle CSS paints on top)
+user_pref("extensions.activeThemeID", "firefox-compact-dark@mozilla.org");
 
 // Disable telemetry
 user_pref("browser.ping-centre.telemetry", false);
@@ -130,28 +294,86 @@ user_pref("datareporting.policy.dataSubmissionEnabled", false);
 """
 
 
+# ─── CLI ──────────────────────────────────────────────────────────────────────
+
+def parse_args() -> Tuple[list, Optional[Path]]:
+    """Parse CLI arguments. Returns (remaining_args, app_path_override)."""
+    app_path = None
+    dry_run = False
+    remaining = []
+    for arg in sys.argv[1:]:
+        if arg.startswith("--app="):
+            app_path = Path(arg[len("--app="):])
+        elif arg == "--dry-run":
+            dry_run = True
+        else:
+            remaining.append(arg)
+    return remaining, app_path, dry_run
+
+
 # ─── Launch ──────────────────────────────────────────────────────────────────
 
-def launch() -> None:
-    """Launch Aggle with the Aggle profile."""
+def launch(app_path: Optional[Path] = None, dry_run: bool = False,
+           extra_args: Optional[list] = None) -> None:
+    """Launch Aggle with the Aggle profile.
+
+    Prefers the browser engine bundled inside this .app bundle; falls back
+    to a system LibreWolf install.
+    """
+    target_app = app_path or AGGLE_APP
+    bundled_bin = APP_ROOT / "MacOS" / "aggle"
+    if not bundled_bin.exists():
+        bundled_bin = APP_ROOT / "MacOS" / "librewolf"
+
+    if dry_run:
+        setup_profile()
+        if bundled_bin.exists():
+            log(f"Dry-run: would launch bundled engine at {bundled_bin}")
+            return
+        log(f"Dry-run: would launch {target_app}")
+        if not target_app.exists():
+            log(f"Error: App not found at {target_app}")
+            sys.exit(1)
+        return
+
     log("Launching Aggle...")
 
-    # Verify Aggle is installed
-    if not LIBREWOLF_APP.exists():
-        log(f"Error: Aggle not found at {LIBREWOLF_APP}")
-        log("Please install Aggle first: https://Aggle.net")
+    # Launch the splash screen concurrently
+    splash_bin = APP_ROOT / "MacOS" / "aggle-splash"
+    if splash_bin.exists():
+        splash_proc = subprocess.Popen([str(splash_bin)])
+        
+        # Fork a monitor to kill the splash screen at exactly 2 seconds
+        monitor_pid = os.fork()
+        if monitor_pid == 0:
+            time.sleep(2.0)
+            if splash_proc.poll() is None:
+                splash_proc.terminate()
+            os._exit(0)
+            
+        # Delay browser launch until 2.3 seconds have passed
+        time.sleep(2.3)
+
+    # Preferred: engine bundled inside this .app
+    if bundled_bin.exists():
+        setup_profile()
+        args = [str(bundled_bin), "--profile", str(PROFILE_DIR)] + list(extra_args or [])
+        log(f"Running bundled engine (profile: {PROFILE_DIR})")
+        os.execv(args[0], args)  # replaces this process; never returns
+
+    # Fallback: system LibreWolf
+    if not target_app.exists():
+        log(f"Error: {target_app.name} not found at {target_app}")
+        log("Please install LibreWolf first: https://librewolf.net")
         sys.exit(1)
 
-    # Setup profile
     setup_profile()
-
-    # Launch with profile
     args = [
         "open",
-        "-a", str(LIBREWOLF_APP),
+        "-a", str(target_app),
         "--args",
         "--profile", str(PROFILE_DIR),
-    ]
+    ] + list(extra_args or [])
     log(f"Running: {' '.join(args)}")
     result = subprocess.run(args)
     sys.exit(result.returncode)
@@ -159,5 +381,19 @@ def launch() -> None:
 
 # ─── Main ────────────────────────────────────────────────────────────────────
 
+USAGE = """Usage: aggle-launcher [--dry-run] [--app=PATH] [BROWSER_ARGS...]
+
+Options:
+  --dry-run       Verify setup without launching the browser
+  --app=PATH      Browser .app bundle to use (fallback when no bundled engine)
+  -h, --help      Show this help
+
+Any other arguments are passed through to the browser engine.
+"""
+
 if __name__ == "__main__":
-    launch()
+    if "-h" in sys.argv[1:] or "--help" in sys.argv[1:]:
+        print(USAGE, end="")
+        sys.exit(0)
+    remaining, app_path, dry_run = parse_args()
+    launch(app_path=app_path, dry_run=dry_run, extra_args=remaining)

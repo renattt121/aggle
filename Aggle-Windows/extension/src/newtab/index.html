@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aggle New Tab</title>
+    <link rel="stylesheet" href="newtab.css">
+</head>
+<body>
+    <!-- Floating clock in the center -->
+    <div class="clock-container">
+        <div class="clock" id="clock">00:00:00</div>
+        <div class="date" id="date">Monday, January 1</div>
+    </div>
+
+    <!-- Greeting message -->
+    <div class="greeting-container">
+        <h1 class="greeting">Welcome back</h1>
+        <p class="sub-greeting">Ready to code?</p>
+    </div>
+
+    <!-- Quick Access Hub -->
+    <div class="quick-access-container">
+        <h2 class="section-title">Quick Access</h2>
+        <div class="bookmarks-grid">
+            <a href="https://chat.openai.com" target="_blank" class="bookmark-btn" data-name="ChatGPT">
+                <span class="bookmark-icon">💬</span>
+                <span class="bookmark-text">ChatGPT</span>
+            </a>
+            <a href="http://192.168.1.100:8080" target="_blank" class="bookmark-btn" data-name="Local AI">
+                <span class="bookmark-icon">🤖</span>
+                <span class="bookmark-text">Local AI</span>
+            </a>
+            <a href="https://web.telegram.org" target="_blank" class="bookmark-btn" data-name="Telegram">
+                <span class="bookmark-icon">💬</span>
+                <span class="bookmark-text">Telegram</span>
+            </a>
+            <a href="https://github.com" target="_blank" class="bookmark-btn" data-name="GitHub">
+                <span class="bookmark-icon">🐙</span>
+                <span class="bookmark-text">GitHub</span>
+            </a>
+            <a href="https://reddit.com" target="_blank" class="bookmark-btn" data-name="Reddit">
+                <span class="bookmark-icon">📰</span>
+                <span class="bookmark-text">Reddit</span>
+            </a>
+            <a href="http://localhost:3000" target="_blank" class="bookmark-btn" data-name="Dev Server">
+                <span class="bookmark-icon">💻</span>
+                <span class="bookmark-text">Dev Server</span>
+            </a>
+        </div>
+    </div>
+
+    <!-- Code Scratchpad -->
+    <div class="scratchpad-container">
+        <h2 class="section-title">Code Scratchpad</h2>
+        <div class="scratchpad">
+            <div class="code-input-container">
+                <textarea class="code-input" id="codeInput" placeholder="Enter HTML/CSS/JS here..."></textarea>
+            </div>
+            <div class="output-container">
+                <div class="output-frame" id="outputFrame"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Local AI Integration -->
+    <div class="ai-container">
+        <h2 class="section-title">Local AI Assistant</h2>
+        <div class="ai-chat">
+            <div class="ai-messages" id="aiMessages">
+                <div class="message ai-message">
+                    <span class="message-text">Hello! I'm your local AI assistant. Ask me anything about coding!</span>
+                </div>
+            </div>
+            <div class="ai-input-container">
+                <input type="text" class="ai-input" id="aiInput" placeholder="Ask something about code...">
+                <button class="ai-send-btn" id="aiSendBtn">Send</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- JavaScript -->
+    <script src="newtab.js"></script>
+</body>
+</html>

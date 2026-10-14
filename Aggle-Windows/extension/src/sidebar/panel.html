@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Aggle AI Web Panel</title>
+  <link rel="stylesheet" href="panel.css">
+</head>
+<body>
+  <!-- Header bar -->
+  <header class="panel-header">
+    <div class="brand">
+      <img src="../../public/icons/aggle-icon.svg" alt="" class="logo">
+      <span class="brand-text">AI Panel</span>
+    </div>
+
+    <div class="header-controls">
+      <select id="service-select" class="service-select" title="Choose AI Service">
+        <option value="gemini">Google Gemini</option>
+        <option value="duckai">DuckDuckGo AI (duck.ai)</option>
+        <option value="chatgpt">ChatGPT</option>
+        <option value="claude">Claude</option>
+        <option value="perplexity">Perplexity</option>
+        <option value="custom">Custom URL…</option>
+      </select>
+
+      <button id="btn-login" class="ctrl-btn" title="Sign in (opens secure tab for account login)">🔑</button>
+      <button id="btn-reload" class="ctrl-btn" title="Reload panel">↻</button>
+      <button id="btn-open-tab" class="ctrl-btn" title="Open in new tab">↗</button>
+      <button id="btn-settings" class="ctrl-btn" title="Edit custom URL">⚙</button>
+    </div>
+  </header>
+
+  <!-- Custom URL prompt banner (toggleable) -->
+  <div id="custom-url-banner" class="custom-url-banner" hidden>
+    <input type="url" id="custom-url-input" placeholder="https://example.com/ai" spellcheck="false" autocomplete="off">
+    <button id="custom-url-save" class="banner-btn">Save</button>
+    <button id="custom-url-cancel" class="banner-btn secondary">✕</button>
+  </div>
+
+  <!-- Web Frame Container -->
+  <div class="frame-container">
+    <iframe
+      id="web-frame"
+      src="https://gemini.google.com"
+      allow="clipboard-read; clipboard-write; microphone; camera; geolocation"
+    ></iframe>
+  </div>
+
+  <!-- Bottom Action Bar -->
+  <footer class="panel-footer">
+    <button id="btn-tell-page" class="tell-page-btn" title="Extract current tab content and prepare prompt">
+      <span class="btn-sparkle">✨</span>
+      <span class="btn-text">Tell me about this page</span>
+    </button>
+    <div id="toast" class="toast" hidden>✓ Page context copied! Paste into chat (⌘V)</div>
+  </footer>
+
+  <script src="../../dist/sidebar/panel.js"></script>
+</body>
+</html>

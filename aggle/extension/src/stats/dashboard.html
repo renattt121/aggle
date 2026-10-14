@@ -4,6 +4,7 @@
   <meta charset="UTF-8">
   <title>Aggle Stats</title>
   <link rel="stylesheet" href="dashboard.css">
+  <link rel="stylesheet" href="../sidebar/palette.css">
 </head>
 <body>
   <div class="layout">
@@ -42,6 +43,10 @@
             <div class="info-row"><span class="label">Profile</span><span class="value" id="stat-profile">—</span></div>
             <div class="info-row"><span class="label">Disk Cache</span><span class="value" id="stat-cache">—</span></div>
           </div>
+        </div>
+        <div class="card">
+          <h2>Top Sites Blocked</h2>
+          <div id="stat-persite" style="max-height:200px; overflow-y:auto; padding-top:10px;"></div>
         </div>
       </section>
 
@@ -84,5 +89,6 @@
     </main>
   </div>
   <script src="../../dist/stats/dashboard.js"></script>
+  <script src="../../dist/sidebar/palette.js"></script>
 </body>
 </html>

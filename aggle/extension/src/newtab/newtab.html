@@ -1,9 +1,12 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+<script>if(browser.extension.inIncognitoContext) { window.location.replace("private.html"); }</script>
+
   <meta charset="UTF-8">
   <title>New Tab</title>
   <link rel="stylesheet" href="newtab.css">
+  <link rel="stylesheet" href="../sidebar/palette.css">
 </head>
 <body>
   <!-- ── Top chrome (liquid glass) ── -->
@@ -34,26 +37,14 @@
           </svg>
         </button>
         <!-- Engine dropdown -->
-        <div class="engine-dd" id="engine-dd" hidden>
-          <button class="engine-opt" data-engine="duckduckgo">
-            <span class="engine-opt-icon">🦆</span>
-            <span>DuckDuckGo</span>
-          </button>
-          <button class="engine-opt" data-engine="google">
-            <span class="engine-opt-icon">G</span>
-            <span>Google</span>
-          </button>
-          <button class="engine-opt" data-engine="bing">
-            <span class="engine-opt-icon">B</span>
-            <span>Bing</span>
-          </button>
-        </div>
+        <div class="engine-dd" id="engine-dd" hidden></div>
       </div>
 
       <div class="chrome-actions">
-        <button class="action-btn" id="btn-stats" title="Aggle Stats">📊</button>
+        <button class="action-btn" id="btn-sidebar" title="Open AI Web Panel" style="color: #FF5A1F; font-weight: 800; border: 1px solid #FF5A1F; border-radius: 8px; padding: 0 10px; width: auto; font-size: 13px; text-transform: uppercase;">Launch AI Panel</button>
+        <a class="action-btn" id="btn-stats" href="aggle:stats" title="Aggle Stats">📊</a>
         <button class="action-btn" id="btn-palette" title="Command Palette (⌘K)">⌘</button>
-        <a class="action-btn" href="../options/options.html" target="_blank" title="Settings">⚙</a>
+        <a class="action-btn" href="aggle:settings" title="Settings">⚙</a>
       </div>
     </div>
   </div>
@@ -74,6 +65,7 @@
     <div class="links" id="quick-links"></div>
   </div>
 
+  <script src="../../dist/sidebar/palette.js"></script>
   <script src="../../dist/newtab/newtab.js"></script>
 </body>
 </html>

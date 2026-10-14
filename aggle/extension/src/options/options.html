@@ -4,6 +4,7 @@
   <meta charset="UTF-8">
   <title>Aggle Settings</title>
   <link rel="stylesheet" href="options.css">
+  <link rel="stylesheet" href="../sidebar/palette.css">
 </head>
 <body>
   <div class="layout">
@@ -92,8 +93,13 @@
           <h2>Default search engine</h2>
           <div class="row" id="search-engine-row">
             <label class="seg"><input type="radio" name="search-engine" value="duckduckgo" checked><span>🦆 DuckDuckGo</span></label>
-            <label class="seg"><input type="radio" name="search-engine" value="google"><span>G Google</span></label>
+            <label class="seg"><input type="radio" name="search-engine" value="google"><span>🔍 Google</span></label>
             <label class="seg"><input type="radio" name="search-engine" value="bing"><span>B Bing</span></label>
+            <label class="seg"><input type="radio" name="search-engine" value="brave"><span>🦁 Brave</span></label>
+            <label class="seg"><input type="radio" name="search-engine" value="startpage"><span>🕵️ Startpage</span></label>
+            <label class="seg"><input type="radio" name="search-engine" value="ecosia"><span>🌳 Ecosia</span></label>
+            <label class="seg"><input type="radio" name="search-engine" value="kagi"><span>🐕 Kagi</span></label>
+            <label class="seg"><input type="radio" name="search-engine" value="youtube"><span>▶️ YouTube</span></label>
           </div>
           <p class="hint">Used in the Aggle address bar when you type a query instead of a URL.</p>
         </div>
@@ -101,15 +107,24 @@
 
       <!-- AI -->
       <section class="tab" id="tab-ai">
-        <h1>AI Sidebar</h1>
+        <h1>AI Web Panel</h1>
+
+        <div class="card" style="border-left: 3px solid var(--accent); background: rgba(255, 90, 31, 0.06);">
+          <h2>Interactive Web Panel Active</h2>
+          <p style="color: var(--muted); font-size: 13px; margin: 6px 0 0 0; line-height: 1.5;">
+            The sidebar runs as a live Web Panel with direct access to official AI web apps (Google Gemini, ChatGPT, Claude, Perplexity, and Custom URLs). You can sign into your account directly in the panel and use the "Tell me about this page" button to send page context.
+          </p>
+        </div>
 
         <div class="card">
           <h2>Provider</h2>
           <div class="field">
             <select id="provider-select">
               <option value="ollama">Ollama (local)</option>
+              <option value="custom_openai">Local (OpenAI format)</option>
               <option value="groq">Groq</option>
               <option value="openai">OpenAI</option>
+              <option value="gemini">Gemini</option>
               <option value="xai">xAI</option>
             </select>
           </div>
@@ -125,7 +140,28 @@
           <div class="field">
             <input type="text" id="ollama-url" placeholder="http://localhost:11434">
           </div>
-          <p class="hint">Run models locally — nothing leaves your machine.</p>
+          <div class="hint">
+            <p>Run models locally — nothing leaves your machine.</p>
+            <p style="margin-top: 8px;"><strong>Setup Instructions:</strong></p>
+            <ol style="margin-top: 4px; padding-left: 20px; line-height: 1.4;">
+              <li>Install <a href="https://ollama.com" target="_blank" style="color: var(--accent);">Ollama</a> on your device.</li>
+              <li>Open your terminal and pull a model, e.g., <code>ollama run llama3.1</code>.</li>
+              <li>Aggle automatically bypasses CORS for local endpoints, so you don't need to configure OLLAMA_ORIGINS.</li>
+              <li>Make sure the Ollama app is running in the background before chatting.</li>
+            </ol>
+          </div>
+        </div>
+
+        <div class="card" id="card-custom_openai">
+          <h2>Local (OpenAI format) endpoint</h2>
+          <div class="field">
+            <label for="custom-openai-url">API URL</label>
+            <input type="text" id="custom-openai-url" placeholder="http://localhost:1234/v1">
+          </div>
+          <div class="field">
+            <label for="key-custom-openai">API Key (Optional)</label>
+            <input type="password" id="key-custom-openai" placeholder="sk-...">
+          </div>
         </div>
 
         <div class="card" id="card-groq">
@@ -139,6 +175,13 @@
           <h2>OpenAI API key</h2>
           <div class="field">
             <input type="password" id="key-openai" placeholder="sk-…">
+          </div>
+        </div>
+
+        <div class="card" id="card-gemini">
+          <h2>Gemini API key</h2>
+          <div class="field">
+            <input type="password" id="key-gemini" placeholder="AIzaSy…">
           </div>
         </div>
 
@@ -239,5 +282,6 @@
 
   <div class="save-toast" id="toast">Saved</div>
   <script src="../../dist/options/options.js"></script>
+  <script src="../../dist/sidebar/palette.js"></script>
 </body>
 </html>

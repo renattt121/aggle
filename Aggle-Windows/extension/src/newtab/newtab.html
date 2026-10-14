@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<script>if(browser.extension.inIncognitoContext) { window.location.replace("private.html"); }</script>
+
+  <meta charset="UTF-8">
+  <title>New Tab</title>
+  <link rel="stylesheet" href="newtab.css">
+  <link rel="stylesheet" href="../sidebar/palette.css">
+</head>
+<body>
+  <!-- ── Top chrome (liquid glass) ── -->
+  <div class="chrome">
+    <div class="chrome-bar">
+      <div class="chrome-nav">
+        <button class="nav-btn" id="btn-back" title="Back">‹</button>
+        <button class="nav-btn" id="btn-fwd" title="Forward">›</button>
+        <button class="nav-btn" id="btn-reload" title="Reload">↻</button>
+      </div>
+
+      <!-- Liquid glass address bar -->
+      <div class="address-bar" id="address-bar">
+        <span class="address-icon" id="address-icon">🔒</span>
+        <input
+          class="address-input"
+          id="address-input"
+          type="text"
+          placeholder="Search or enter address…"
+          autocomplete="off"
+          spellcheck="false"
+          autofocus
+        >
+        <button class="engine-btn" id="engine-btn" title="Change search engine">
+          <span id="engine-icon">🦆</span>
+          <svg class="engine-arrow" viewBox="0 0 10 6" width="8" height="6">
+            <path d="M1 1l4 4 4-4" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/>
+          </svg>
+        </button>
+        <!-- Engine dropdown -->
+        <div class="engine-dd" id="engine-dd" hidden></div>
+      </div>
+
+      <div class="chrome-actions">
+        <button class="action-btn" id="btn-sidebar" title="Open AI Web Panel" style="color: #FF5A1F; font-weight: 800; border: 1px solid #FF5A1F; border-radius: 8px; padding: 0 10px; width: auto; font-size: 13px; text-transform: uppercase;">Launch AI Panel</button>
+        <a class="action-btn" id="btn-stats" href="aggle:stats" title="Aggle Stats">📊</a>
+        <button class="action-btn" id="btn-palette" title="Command Palette (⌘K)">⌘</button>
+        <a class="action-btn" href="aggle:settings" title="Settings">⚙</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Main content ── -->
+  <div class="main">
+    <div class="brand">
+      <img src="../../public/icons/aggle-icon.svg" alt="" class="logo">
+      <span class="brand-name">Aggle</span>
+    </div>
+
+    <p class="greeting" id="greeting">Good evening</p>
+    <div class="clock">
+      <div class="clock-time" id="clock-time">12:00 PM</div>
+      <div class="clock-date" id="clock-date">Mon, Jan 1</div>
+    </div>
+
+    <div class="links" id="quick-links"></div>
+  </div>
+
+  <script src="../../dist/sidebar/palette.js"></script>
+  <script src="../../dist/newtab/newtab.js"></script>
+</body>
+</html>
