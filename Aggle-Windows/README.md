@@ -55,7 +55,8 @@ This creates an **Aggle Browser** shortcut with the official high-resolution ico
 | `launcher/run-aggle.bat` | Double-clickable batch launcher. |
 | `launcher/run-aggle.ps1` | Advanced PowerShell launcher with auto-winget fallback. |
 | `launcher/install-aggle.ps1` | Shortcut installer for Desktop and Start Menu. |
-| `launcher/aggle-launcher.vbs` | Silent launcher wrapper (prevents black command window pop-ups). |
+| `docs/VISUAL_SPECIFICATION.md` | Visual design specifications, color tokens, and screenshot references. |
+| `docs/visual-references/` | Screenshots of the browser UI, AI sidebar, and icons. |
 | `packaging/Aggle-Setup.iss` | Inno Setup 6 configuration script to compile `Aggle-Windows-Setup.exe`. |
 | `INSTRUCTIONS_FOR_AI.md` | Master prompt and engineering guide for AI assistants on Windows. |
 | `.agents/skills/` | Canonical Agent Skill (`aggle-windows-engineering`) for automated workflows. |

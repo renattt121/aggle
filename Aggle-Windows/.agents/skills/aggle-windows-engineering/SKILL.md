@@ -36,6 +36,9 @@ Aggle-Windows/
 │   ├── aggle-launcher.vbs             # Silent WScript wrapper (launches without CMD window flash)
 │   ├── aggle-launcher.py              # Cross-platform Python orchestrator
 │   └── aggle.ico                      # Multi-resolution Windows application icon (16x16 to 256x256)
+├── docs/
+│   ├── VISUAL_SPECIFICATION.md        # Comprehensive visual design specs, geometry, and color tokens
+│   └── visual-references/             # UI screenshots, layout captures, and icons
 ├── packaging/
 │   ├── Aggle-Setup.iss                # Inno Setup 6 compiler configuration script
 │   ├── build-installer.bat            # Automated batch compiler for Aggle-Windows-Setup.exe

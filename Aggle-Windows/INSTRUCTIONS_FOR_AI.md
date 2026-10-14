@@ -1,134 +1,161 @@
-# INSTRUCTIONS FOR AI: Porting & Running Aggle Browser on Windows
+# Master Instruction Manual for AI Agents: Porting & Setting up Aggle Browser on Windows
 
-> **Notice for the AI Assistant**:
-> You are acting as a Senior Browser Systems Engineer specializing in Mozilla Firefox / LibreWolf Gecko customizations and Windows client application design.
-> Your goal is to guide the user (or execute the steps autonomously) to set up and run the **Aggle Browser** on Microsoft Windows 10 or 11 with **100% visual and feature parity** with the macOS flagship build.
-
----
-
-## 1. Project Background & Vision
-
-**Aggle Browser** is a privacy-first browser that pairs the hardened Gecko engine of LibreWolf with a custom **Liquid Glass Dark Ember** user interface, a compact bookmarks toolbar, an AI web sidebar (supporting Google Gemini, DuckDuckGo AI, Claude, ChatGPT, and Perplexity), and a built-in Command Palette.
-
-The project structure in this directory is already fully prepared:
-- `chrome/userChrome.css`: Windows 11-adapted stylesheet for browser toolbars, tabs, and caption buttons.
-- `chrome/userContent.css`: Internal page stylesheet (about:newtab, about:privatebrowsing, context menus).
-- `profile/user.js`: Crucial Firefox Gecko preferences enabling user CSS, hardware acceleration, and privacy.
-- `extension/aggle-extension.xpi`: Pre-built, production WebExtension.
-- `launcher/run-aggle.bat` & `run-aggle.ps1`: Complete launchers that create profiles, register extensions, and boot the browser.
-- `launcher/install-aggle.ps1`: Creates Windows Desktop and Start Menu shortcuts.
-- `packaging/Aggle-Setup.iss`: Inno Setup installer script for compiling `Aggle-Windows-Setup.exe`.
+> **Directive for the AI Assistant (Claude Code, Cursor, Copilot, ChatGPT, or Antigravity)**:  
+> You are acting as a **Principal Client Systems Engineer** specializing in Mozilla Firefox / LibreWolf Gecko engine internals and Windows desktop application integration.  
+> Your task is to inspect the host Windows environment, provision the Aggle Browser profile, verify the stylesheets and extension registration, and launch the browser so that it achieves **100% visual and functional parity** with the macOS flagship build.
 
 ---
 
-## 2. Windows System Requirements
+## 1. Visual Grounding & Reference Assets
 
-1. **OS**: Windows 10 (version 1809+) or Windows 11 (64-bit recommended).
-2. **Browser Engine**: LibreWolf (preferred) or standard Mozilla Firefox (version 115+ ESR or Release 125+).
-   - If not installed, it can be installed in seconds via Windows Package Manager:
-     ```powershell
-     winget install LibreWolf.LibreWolf --accept-source-agreements --accept-package-agreements
-     ```
-3. **PowerShell**: Windows PowerShell 5.1 or PowerShell 7 (preinstalled on Windows).
+Before making any adjustments, inspect the visual references and specifications provided in this folder:
+- **Design Specification**: Read [`docs/VISUAL_SPECIFICATION.md`](./docs/VISUAL_SPECIFICATION.md) for color tokens, dimensions, and layout rules.
+- **Visual Screenshots**:
+  - [`docs/visual-references/reference-browser-ui.png`](./docs/visual-references/reference-browser-ui.png) — Inspect the overall window layout, active tab ember glow, address bar, compact bookmarks bar, and open AI sidebar.
+  - [`docs/visual-references/reference-sidebar-panel.png`](./docs/visual-references/reference-sidebar-panel.png) — Inspect the AI Web Panel layout, provider switcher buttons, and bottom context button.
+  - [`docs/visual-references/aggle-icon.svg`](./docs/visual-references/aggle-icon.svg) — Master vector icon.
+  - [`launcher/aggle.ico`](./launcher/aggle.ico) — Multi-resolution Windows application icon.
 
 ---
 
-## 3. Step-by-Step AI Execution Plan
+## 2. Windows Architecture & File Invariants
 
-If you (the AI) have tool execution capabilities on the user's Windows machine, execute the following steps in sequence. If you are instructing a human user, guide them through these steps:
+On Windows, Aggle operates as a standalone profile layer over the **LibreWolf** (or Mozilla Firefox) Gecko engine:
 
-### Step 1: Verify or Install the Browser Engine
-Check if LibreWolf exists in standard locations:
-- `C:\Program Files\LibreWolf\librewolf.exe`
-- `%LOCALAPPDATA%\Programs\LibreWolf\librewolf.exe`
-
-If neither exists, run:
-```powershell
-winget install LibreWolf.LibreWolf --accept-source-agreements --accept-package-agreements
+```text
+Host Environment Paths:
+  Profile Root:       %APPDATA%\Aggle\Profiles\default
+  Chrome Styles:      %APPDATA%\Aggle\Profiles\default\chrome\
+  Extensions Folder:  %APPDATA%\Aggle\Profiles\default\extensions\
+  Preferences File:   %APPDATA%\Aggle\Profiles\default\user.js
+  Extension Database: %APPDATA%\Aggle\Profiles\default\extensions.json
+  Startup Caches:     %LOCALAPPDATA%\LibreWolf\Profiles\*\startupCache
+                      %LOCALAPPDATA%\Aggle\Profiles\*\startupCache
 ```
 
-### Step 2: Initialize the Aggle Profile
-The target profile directory on Windows MUST be:
-`%APPDATA%\Aggle\Profiles\default`
+---
 
-Create the required directories:
+## 3. Autonomous Execution Protocol (Step-by-Step)
+
+If you have shell/tool access on the user's Windows machine, execute the following steps in sequence:
+
+### Phase 1: Engine Detection & Automatic Installation
+Check whether LibreWolf or Firefox is installed. Run in PowerShell:
+```powershell
+$CandidatePaths = @(
+    "$env:LOCALAPPDATA\Programs\LibreWolf\librewolf.exe",
+    "C:\Program Files\LibreWolf\librewolf.exe",
+    "C:\Program Files (x86)\LibreWolf\librewolf.exe",
+    "$env:LOCALAPPDATA\Mozilla Firefox\firefox.exe",
+    "C:\Program Files\Mozilla Firefox\firefox.exe"
+)
+$BrowserExe = $CandidatePaths | Where-Object { Test-Path $_ } | Select-Object -First 1
+
+if (-not $BrowserExe) {
+    Write-Host "Installing LibreWolf via winget..."
+    winget install LibreWolf.LibreWolf --accept-source-agreements --accept-package-agreements
+}
+```
+
+### Phase 2: Profile Structure Provisioning
+Create the dedicated profile directories:
 ```powershell
 $ProfileDir = "$env:APPDATA\Aggle\Profiles\default"
-New-Item -ItemType Directory -Path "$ProfileDir\chrome" -Force
-New-Item -ItemType Directory -Path "$ProfileDir\extensions" -Force
+$ChromeDir  = "$ProfileDir\chrome"
+$ExtDir     = "$ProfileDir\extensions"
+
+@($ProfileDir, $ChromeDir, $ExtDir) | ForEach-Object {
+    if (-not (Test-Path $_)) { New-Item -ItemType Directory -Path $_ -Force | Out-Null }
+}
 ```
 
-### Step 3: Copy Stylesheets & Preferences
-1. Copy `chrome\userChrome.css` and `chrome\userContent.css` into `$ProfileDir\chrome\`.
-2. Copy `profile\user.js` into `$ProfileDir\user.js`.
+### Phase 3: Synchronize Chrome Stylesheets
+Copy `chrome/userChrome.css` and `chrome/userContent.css` into `$ChromeDir`:
+```powershell
+Copy-Item -Path ".\chrome\userChrome.css" -Destination "$ChromeDir\userChrome.css" -Force
+Copy-Item -Path ".\chrome\userContent.css" -Destination "$ChromeDir\userContent.css" -Force
+```
 
-### Step 4: Install & Register the Extension
-1. Copy `extension\aggle-extension.xpi` into:
-   `$ProfileDir\extensions\aggle@aggle.dev.xpi`
-2. Update `$ProfileDir\extensions.json` to register `aggle@aggle.dev` as an active app-profile extension. (This is automated by `launcher\run-aggle.ps1` or `launcher\run-aggle.bat`).
+### Phase 4: Apply Master Preferences (`user.js`)
+Copy `profile/user.js` into `$ProfileDir\user.js`:
+```powershell
+Copy-Item -Path ".\profile\user.js" -Destination "$ProfileDir\user.js" -Force
+```
+*Key Invariant: `toolkit.legacyUserProfileCustomizations.stylesheets = true` and `browser.toolbars.bookmarks.visibility = "always"` must be active.*
 
-### Step 5: Purge Startup Cache
-Gecko aggressively caches XUL stylesheets. Before launching, clear:
-- `%LOCALAPPDATA%\LibreWolf\Profiles\*\startupCache`
-- `%LOCALAPPDATA%\Aggle\Profiles\*\startupCache`
+### Phase 5: Install & Register WebExtension
+1. Copy the packaged extension into `$ExtDir`:
+   ```powershell
+   Copy-Item -Path ".\extension\aggle-extension.xpi" -Destination "$ExtDir\aggle@aggle.dev.xpi" -Force
+   ```
+2. Register `aggle@aggle.dev` inside `$ProfileDir\extensions.json` with schema version 31. *(This ensures Gecko boots the extension without blocking it as unsigned or untrusted)*.
+   *(You can simply execute `launcher\run-aggle.ps1` which automates this JSON injection).*
 
-### Step 6: Launch Aggle
-Launch the browser pointing directly to the profile:
-```cmd
-"C:\Program Files\LibreWolf\librewolf.exe" --profile "%APPDATA%\Aggle\Profiles\default"
+### Phase 6: Invalidate Gecko `startupCache` (Mandatory!)
+Gecko caches compiled XUL boxes and CSS bytecode. If you modify `userChrome.css` without purging this cache, your changes will NOT appear!
+```powershell
+Get-ChildItem -Path "$env:LOCALAPPDATA\LibreWolf\Profiles", "$env:LOCALAPPDATA\Aggle\Profiles" -Directory -ErrorAction SilentlyContinue | ForEach-Object {
+    $sc = Join-Path $_.FullName "startupCache"
+    if (Test-Path $sc) { Remove-Item -Path $sc -Recurse -Force -ErrorAction SilentlyContinue }
+}
+```
+
+### Phase 7: Create Windows Shortcuts
+Run `launcher\install-aggle.ps1` to place shortcuts on the Desktop and Start Menu:
+```powershell
+powershell -ExecutionPolicy Bypass -File .\launcher\install-aggle.ps1
+```
+
+### Phase 8: Launch & Test
+Launch LibreWolf with the explicit profile:
+```powershell
+Start-Process -FilePath $BrowserExe -ArgumentList @("--profile", $ProfileDir)
 ```
 *(Or simply run `launcher\run-aggle.bat`)*
 
 ---
 
-## 4. Design Guidelines & Invariants (Must Preserve!)
+## 4. Critical Engineering Gotchas & Invariants
 
-When making any code or CSS modifications, the AI **must** enforce these rules:
+### ⚠️ Gotcha 1: The Golden Rule of Gecko XUL Box Layout
+**NEVER** apply `display: flex`, `position: absolute`, or `all: unset` to native XUL toolbar containers:
+- `#navigator-toolbox`
+- `#TabsToolbar`
+- `#nav-bar`
+- `#PersonalToolbar`
+- `.tabbrowser-tab`
 
-1. **NEVER Override Native XUL Box Layout**:
-   - Do **NOT** set `display: flex`, `position: absolute`, or `all: unset` on `#navigator-toolbox`, `#TabsToolbar`, `#nav-bar`, or `#PersonalToolbar`.
-   - Modifying those properties causes Gecko's internal box model to collapse, producing invisible tabs, vanishing toolbars, or an address bar that occupies the entire viewport height.
-   - Only modify `background`, `border`, `border-radius`, `padding`, `margin`, `color`, and `opacity`.
+*Why*: Gecko's internal C++ box layout engine coordinates tab widths, window dragging, and address bar positioning. Overriding `display` or `position` causes the entire toolbar to collapse to 0 height or the address bar to stretch across the full screen. Only adjust **backgrounds, borders, radii, padding, margin, opacity, and colors**.
 
-2. **Windows Caption Controls**:
-   - Caption buttons (Minimize, Maximize, Close) are on the top-right in `#titlebar .titlebar-buttonbox`.
-   - Keep them flat with standard dimensions (`height: 36px`, `padding: 0 14px`).
-   - The close button (`.titlebar-close`) must transition to background `#E81123` with `#FFFFFF` text on hover.
+### ⚠️ Gotcha 2: Windows Caption Buttons on the Top-Right
+On macOS, window controls are traffic lights on the top-left. On Windows, they are caption buttons in `#titlebar .titlebar-buttonbox` on the **top-right**:
+- Never set circular `border-radius: 50%` on `.titlebar-button` on Windows.
+- Keep standard height (`36px`) and rectangular padding (`0 14px`).
+- On close button hover (`.titlebar-close:hover`), set background to `#E81123` with `#FFFFFF` text.
 
-3. **Liquid Glass & Ember Theme Tokens**:
-   - Base Black: `#0A0A0A`
-   - Panels: `#121214` and `#1A1A1E`
-   - Separators: `#26262B`
-   - Primary Ember Accent: `#FF5A1F`
-   - Active Tab Gradient: `linear-gradient(135deg, rgba(255, 90, 31, 0.32) 0%, rgba(255, 138, 61, 0.16) 100%)`
-   - Font Family: `"Segoe UI Variable Text", "Segoe UI Variable Display", "Segoe UI", -apple-system, BlinkMacSystemFont, system-ui, sans-serif`
+### ⚠️ Gotcha 3: Google & OpenAI OAuth Iframe Restriction
+Google enforces `X-Frame-Options: SAMEORIGIN` and intentionally rejects sign-in attempts inside iframes with error `401: malformed_request`.
+- Aggle solves this via the background interceptor in `extension/dist/background.js`.
+- It monitors `webRequest.onBeforeRequest` and redirects any URL matching `accounts.google.com`, `auth.openai.com`, or `appleid.apple.com` to a standard browser tab.
+- Once signed in on the tab, the session cookies automatically share with the sidebar iframe. Do not remove this interceptor!
 
-4. **Bookmarks Bar**:
-   - Must be positioned directly underneath the address bar.
-   - Ultra-compact height (`min-height: 26px; max-height: 28px; padding: 1px 8px`).
-   - Preference `browser.toolbars.bookmarks.visibility` must be `"always"`.
-
-5. **AI Sidebar Panel**:
-   - Sidebar panel must support switching between Google Gemini, DuckDuckGo AI (`duck.ai`), Claude, ChatGPT, and Perplexity.
-   - The OAuth redirect in `dist/background.js` must remain intact so Google authentication opens in a top-level tab rather than throwing an iframe error.
-
----
-
-## 5. Verification Checklist
-
-After launching the browser, confirm:
-1. **Window Frame**: Dark ember liquid glass titlebar; Windows caption buttons on top-right function smoothly.
-2. **Tab Bar**: Floating tabs with ember orange glow on the active tab; smooth drag-to-reorder.
-3. **Address Bar**: Glass input field with subtle glow; no cyan focus ring.
-4. **Bookmarks Toolbar**: Visibly docked right below the URL bar in compact mode.
-5. **Sidebar**: Clicking the Aggle logo in the toolbar opens the AI sidebar; duck.ai and Gemini load properly; "Tell me about this page" extracts the active tab's context.
-6. **New Tab Page**: Custom dark Aggle clock page loads instantly.
+### ⚠️ Gotcha 4: Compact Bookmarks Toolbar
+The bookmarks bar must be docked directly below `#nav-bar` with ultra-compact dimensions:
+- Container: `#PersonalToolbar`
+- Height: `26px - 28px`
+- Preference: `browser.toolbars.bookmarks.visibility = "always"`
 
 ---
 
-## 6. How to Build a Windows Installer (`.exe`)
+## 5. Visual Quality Acceptance Checklist
 
-To turn this into a professional 1-click Windows installer:
-1. Install Inno Setup 6: `winget install JRSoftware.InnoSetup`
-2. Run `packaging\build-installer.bat`
-3. The standalone installer `dist\Aggle-Windows-Setup.exe` will be generated.
+Once launched, verify each point against [`docs/visual-references/reference-browser-ui.png`](./docs/visual-references/reference-browser-ui.png):
+
+- [ ] **Caption Buttons**: Top-right buttons minimize, maximize, and close smoothly. Close button turns red on hover.
+- [ ] **Tab Bar**: Floating tabs with subtle borders; the active tab has an ember orange glow gradient.
+- [ ] **Icons**: Back, Forward, Reload, Star, and Sidebar icons render cleanly without collapsing.
+- [ ] **Address Bar**: Glass aesthetic with subtle inner glow; no bright cyan focus rings.
+- [ ] **Bookmarks Bar**: Visible beneath the URL bar; compact height (~26px) with glass pill hover effects.
+- [ ] **AI Sidebar**: Clicking the Aggle logo toggles the sidebar; switching between DuckDuckGo AI, Gemini, Claude, and ChatGPT works seamlessly.
+- [ ] **Page Context**: Clicking "Tell me about this page" extracts the active tab's metadata.
+- [ ] **Performance**: Smooth scrolling and GPU hardware acceleration active (`gfx.webrender.all: true`).
